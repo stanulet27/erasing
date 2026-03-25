@@ -66,7 +66,7 @@ def esd_flux_call(
     joint_attention_kwargs: Optional[Dict[str, Any]] = None,
     callback_on_step_end: Optional[Callable[[int, int, Dict], None]] = None,
     callback_on_step_end_tensor_inputs: List[str] = ["latents"],
-    max_sequence_length: int = 512,
+    max_sequence_length: int = 77,
     run_from_timestep=0,
     run_till_timestep=None,
     start_latents=None,
@@ -160,7 +160,7 @@ def esd_flux_call(
             The list of tensor inputs for the `callback_on_step_end` function. The tensors specified in the list
             will be passed as `callback_kwargs` argument. You will only be able to include variables listed in the
             `._callback_tensor_inputs` attribute of your pipeline class.
-        max_sequence_length (`int` defaults to 512): Maximum sequence length to use with the `prompt`.
+        max_sequence_length (`int` defaults to 77): Maximum sequence length to use with the `prompt`.
 
     Examples:
 

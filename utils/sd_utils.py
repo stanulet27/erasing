@@ -135,7 +135,7 @@ def esd_sd_call(
     else:
         batch_size = prompt_embeds.shape[0]
 
-    device = self._execution_device
+    device = self.unet.device
 
     # 3. Encode input prompt
     lora_scale = (
@@ -209,7 +209,7 @@ def esd_sd_call(
     timesteps = timesteps[run_from_timestep: run_till_timestep]
     if start_latents is not None:
         latents = start_latents
-    num_warmup_steps = len(timesteps) - num_inference_steps * self.scheduler.order
+    num_warmup_steps = max(len(timesteps) - num_inference_steps * self.scheduler.order, 0)
     self._num_timesteps = len(timesteps)
     with self.progress_bar(total=num_inference_steps) as progress_bar:
         for i, t in enumerate(timesteps):

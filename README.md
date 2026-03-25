@@ -51,7 +51,13 @@ After installation (make sure: diffusers and transformers are up-to-date), follo
 python esd_flux.py --erase_concept 'monster' --train_method 'esd-x' --negative_guidance 2
 ```
 
-All three training scripts also accept `--basemodel_id` so you can point them at any compatible diffusers model in that family.
+### FLUX.2 Klein
+FLUX.2 Klein uses the newer `Flux2KleinPipeline` backbone, so make sure your `diffusers` and `transformers` installs are recent enough for FLUX.2 support. The default base model is `black-forest-labs/FLUX.2-klein-base-4B`, and the new entrypoint keeps the same ESD loss while following the Klein tokenizer / transformer / scheduler flow:
+```python
+python esd_flux2_klein.py --erase_concept 'monster' --train_method 'esd-x' --negative_guidance 2
+```
+
+All four training scripts also accept `--basemodel_id` so you can point them at any compatible diffusers model in that family.
 
 The optimization process for erasing undesired visual concepts from pre-trained diffusion model weights involves using a short text description of the concept as guidance. The ESD model is fine-tuned with the conditioned and unconditioned scores obtained from frozen SD model to guide the output away from the concept being erased. The model learns from it's own knowledge to steer the diffusion process away from the undesired concept.
 <div align='center'>

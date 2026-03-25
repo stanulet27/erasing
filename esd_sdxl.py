@@ -45,6 +45,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--negative_guidance", help="negative guidance value", type=float, default=1)
     parser.add_argument("--save_path", help="directory to save checkpoints", type=str, default="esd-models/sdxl/")
     parser.add_argument("--device", help="device to train on", type=str, default="cuda:0")
+    parser.add_argument(
+        "--gradient_checkpointing",
+        help="enable gradient checkpointing on the trainable component",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--allow_tf32",
+        help="allow TF32 matmuls on supported CUDA hardware",
+        action="store_true",
+    )
     return parser
 
 
@@ -66,6 +76,8 @@ def main() -> None:
         save_path=args.save_path,
         device=args.device,
         torch_dtype=torch.bfloat16,
+        gradient_checkpointing=args.gradient_checkpointing,
+        allow_tf32=args.allow_tf32,
     )
     checkpoint_path = run_esd_training(config)
     print(f"Saved checkpoint to {checkpoint_path}")

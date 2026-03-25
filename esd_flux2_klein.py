@@ -9,30 +9,30 @@ from utils.esd_trainer import ESDConfig, run_esd_training
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="TrainESD for FLUX",
-        description="Fine-tune a FLUX transformer to erase concepts.",
+        prog="TrainESD for FLUX.2 Klein",
+        description="Fine-tune a FLUX.2 Klein transformer to erase concepts.",
     )
     parser.add_argument(
         "--basemodel_id",
-        help="HF model id for any FLUX-compatible diffusers pipeline",
+        help="HF model id for any FLUX.2 Klein-compatible diffusers pipeline",
         type=str,
-        default="black-forest-labs/FLUX.1-dev",
+        default="black-forest-labs/FLUX.2-klein-base-4B",
     )
     parser.add_argument("--erase_concept", help="concept to erase", type=str, required=True)
     parser.add_argument("--erase_from", help="target concept to erase from", type=str, default=None)
-    parser.add_argument("--num_inference_steps", help="number of denoising steps", type=int, default=28)
+    parser.add_argument("--num_inference_steps", help="number of denoising steps", type=int, default=50)
     parser.add_argument("--guidance_scale", help="guidance scale for direct transformer calls", type=float, default=1)
     parser.add_argument(
         "--inference_guidance_scale",
         help="guidance scale used while sampling xt",
         type=float,
-        default=3.5,
+        default=4.0,
     )
     parser.add_argument(
         "--max_sequence_length",
-        help="max sequence length for FLUX text encoders. Defaults to 77; increase for longer prompts.",
+        help="max sequence length for the Klein Qwen text encoder",
         type=int,
-        default=77,
+        default=512,
     )
     parser.add_argument(
         "--train_method",
@@ -43,9 +43,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--iterations", help="number of optimization steps", type=int, default=1400)
     parser.add_argument(
         "--resolution",
-        help="training resolution. Defaults to 512 to keep memory manageable.",
+        help="training resolution. Defaults to the base model native size.",
         type=int,
-        default=512,
+        default=None,
     )
     parser.add_argument(
         "--lr",
@@ -55,7 +55,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--batchsize", help="batch size for prompt embeddings", type=int, default=1)
     parser.add_argument("--negative_guidance", help="negative guidance value", type=float, default=1)
-    parser.add_argument("--save_path", help="directory to save checkpoints", type=str, default="esd-models/flux/")
+    parser.add_argument(
+        "--save_path",
+        help="directory to save checkpoints",
+        type=str,
+        default="esd-models/flux2-klein/",
+    )
     parser.add_argument("--device", help="device to train on", type=str, default="cuda:0")
     parser.add_argument(
         "--gradient_checkpointing",
@@ -73,7 +78,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     args = build_parser().parse_args()
     config = ESDConfig(
-        family="flux",
+        family="flux2_klein",
         base_model_id=args.basemodel_id,
         erase_concept=args.erase_concept,
         erase_from=args.erase_from,

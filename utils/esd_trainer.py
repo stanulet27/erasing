@@ -3,6 +3,7 @@ from __future__ import annotations
 import gc
 import os
 import random
+import warnings
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, Mapping, Optional
@@ -10,12 +11,17 @@ from typing import Any, Dict, Iterable, Mapping, Optional
 import numpy as np
 import torch
 import torch.nn.functional as F
-from diffusers import AutoencoderTiny, FluxPipeline, StableDiffusionPipeline, StableDiffusionXLPipeline
+from diffusers import FluxPipeline, StableDiffusionPipeline, StableDiffusionXLPipeline
 from diffusers.pipelines.flux.pipeline_flux import calculate_shift, retrieve_timesteps as retrieve_flux_timesteps
 from tqdm.auto import tqdm
 
 from utils.esd_checkpoint import save_esd_checkpoint
 from utils.flux_utils import esd_flux_call
+from utils.flux2_klein_utils import (
+    compute_empirical_mu,
+    esd_flux2_klein_call,
+    retrieve_flux2_klein_timesteps,
+)
 from utils.sd_utils import esd_sd_call
 from utils.sdxl_utils import esd_sdxl_call
 
@@ -46,7 +52,9 @@ class ESDConfig:
     device: str = "cuda:0"
     torch_dtype: torch.dtype = torch.bfloat16
     inference_guidance_scale: Optional[float] = None
-    max_sequence_length: int = 512
+    max_sequence_length: int = 77
+    gradient_checkpointing: bool = False
+    allow_tf32: bool = False
 
     @property
     def erase_from_effective(self) -> str:
@@ -136,7 +144,11 @@ def select_parameter_names(
     return selected_names
 
 
-def prepare_component(component: torch.nn.Module, parameter_names: list[str]) -> PreparedComponent:
+def prepare_component(
+    component: torch.nn.Module,
+    parameter_names: list[str],
+    trainable_dtype: Optional[torch.dtype] = None,
+) -> PreparedComponent:
     if not parameter_names:
         raise ValueError("No trainable parameters were selected for this configuration.")
 
@@ -150,8 +162,16 @@ def prepare_component(component: torch.nn.Module, parameter_names: list[str]) ->
             raise KeyError(f"Parameter '{parameter_name}' was not found on the target component.")
 
         param = named_params[parameter_name]
-        param.requires_grad_(True)
-        student_params[parameter_name] = param
+        if trainable_dtype is not None and param.dtype != trainable_dtype:
+            student_param = torch.nn.Parameter(
+                param.detach().to(dtype=trainable_dtype).clone(),
+                requires_grad=True,
+            )
+        else:
+            param.requires_grad_(True)
+            student_param = param
+
+        student_params[parameter_name] = student_param
         base_params[parameter_name] = torch.nn.Parameter(param.detach().clone(), requires_grad=False)
 
     return PreparedComponent(component, student_params, base_params)
@@ -164,6 +184,21 @@ def sanitize_checkpoint_name(text: str) -> str:
 def clear_device_cache(device: str) -> None:
     if str(device).startswith("cuda") and torch.cuda.is_available():
         torch.cuda.empty_cache()
+
+
+def offload_modules_to_cpu(device: str, *modules: Optional[torch.nn.Module]) -> None:
+    for module in modules:
+        if module is not None:
+            module.to("cpu")
+    clear_device_cache(device)
+    gc.collect()
+
+
+def make_sampling_generator(device: str, seed: int) -> torch.Generator:
+    target_device = torch.device(device)
+    if target_device.type == "cuda" and torch.cuda.is_available():
+        return torch.Generator(device=target_device).manual_seed(seed)
+    return torch.Generator().manual_seed(seed)
 
 
 class BaseESDAdapter:
@@ -180,6 +215,9 @@ class BaseESDAdapter:
 
     def load_pipeline(self, config: ESDConfig):
         raise NotImplementedError
+
+    def trainable_param_dtype(self, config: ESDConfig) -> Optional[torch.dtype]:
+        return None
 
     def select_parameter_names(self, component: torch.nn.Module, train_method: str) -> list[str]:
         raise NotImplementedError
@@ -232,10 +270,10 @@ class BaseESDAdapter:
         )
         return os.path.join(config.save_path, filename)
 
-    def create_prepared_component(self, pipe, train_method: str) -> PreparedComponent:
+    def create_prepared_component(self, pipe, train_method: str, config: ESDConfig) -> PreparedComponent:
         component = getattr(pipe, self.component_attr)
         parameter_names = self.select_parameter_names(component, train_method)
-        return prepare_component(component, parameter_names)
+        return prepare_component(component, parameter_names, trainable_dtype=self.trainable_param_dtype(config))
 
 
 class StableDiffusionESDAdapter(BaseESDAdapter):
@@ -264,12 +302,20 @@ class StableDiffusionESDAdapter(BaseESDAdapter):
     def default_lr_for_method(self, train_method: str) -> float:
         return 5e-5
 
+    def trainable_param_dtype(self, config: ESDConfig) -> Optional[torch.dtype]:
+        return torch.float32
+
     def load_pipeline(self, config: ESDConfig):
-        return StableDiffusionPipeline.from_pretrained(
+        pipe = StableDiffusionPipeline.from_pretrained(
             config.base_model_id,
             torch_dtype=config.torch_dtype,
             use_safetensors=True,
         ).to(config.device)
+        pipe.vae.requires_grad_(False)
+        pipe.text_encoder.requires_grad_(False)
+        if pipe.safety_checker is not None:
+            pipe.safety_checker.requires_grad_(False)
+        return pipe
 
     def select_parameter_names(self, component: torch.nn.Module, train_method: str) -> list[str]:
         def selector(module_name: str) -> bool:
@@ -319,6 +365,8 @@ class StableDiffusionESDAdapter(BaseESDAdapter):
                     embedding_dim=pipe.unet.config.time_cond_proj_dim,
                 ).to(device=config.device, dtype=config.torch_dtype)
 
+        offload_modules_to_cpu(config.device, pipe.vae, pipe.text_encoder, pipe.safety_checker)
+
         return {
             "resolution": resolution,
             "erase_embeds": erase_embeds,
@@ -345,7 +393,7 @@ class StableDiffusionESDAdapter(BaseESDAdapter):
                 num_inference_steps=config.num_inference_steps,
                 guidance_scale=config.guidance_scale,
                 run_till_timestep=run_till_timestep,
-                generator=torch.Generator().manual_seed(seed),
+                generator=make_sampling_generator(config.device, seed),
                 output_type="latent",
                 height=context["resolution"],
                 width=context["resolution"],
@@ -420,6 +468,12 @@ class StableDiffusionXLESDAdapter(BaseESDAdapter):
         normalized = aliases.get(train_method)
         if normalized is None:
             raise ValueError(f"Unsupported SDXL train method: {train_method}")
+        if normalized in {"esd-u", "esd-all"}:
+            warnings.warn(
+                "SDXL `esd-u` and `esd-all` update a very large fraction of the UNet and can strongly degrade "
+                "overall model quality. Prefer `esd-x` or `esd-x-strict` unless you intentionally want global erasure.",
+                stacklevel=2,
+            )
         return normalized
 
     def default_lr_for_method(self, train_method: str) -> float:
@@ -427,12 +481,21 @@ class StableDiffusionXLESDAdapter(BaseESDAdapter):
             return 2e-4
         return 1e-5
 
+    def trainable_param_dtype(self, config: ESDConfig) -> Optional[torch.dtype]:
+        return torch.float32
+
     def load_pipeline(self, config: ESDConfig):
-        return StableDiffusionXLPipeline.from_pretrained(
+        pipe = StableDiffusionXLPipeline.from_pretrained(
             config.base_model_id,
             torch_dtype=config.torch_dtype,
             use_safetensors=True,
         ).to(config.device)
+        pipe.vae.requires_grad_(False)
+        if pipe.text_encoder is not None:
+            pipe.text_encoder.requires_grad_(False)
+        if pipe.text_encoder_2 is not None:
+            pipe.text_encoder_2.requires_grad_(False)
+        return pipe
 
     def select_parameter_names(self, component: torch.nn.Module, train_method: str) -> list[str]:
         def selector(module_name: str) -> bool:
@@ -498,6 +561,8 @@ class StableDiffusionXLESDAdapter(BaseESDAdapter):
                     embedding_dim=pipe.unet.config.time_cond_proj_dim,
                 ).to(device=config.device, dtype=config.torch_dtype)
 
+        offload_modules_to_cpu(config.device, pipe.vae, pipe.text_encoder, pipe.text_encoder_2)
+
         return {
             "resolution": resolution,
             "erase_embeds": erase_embeds,
@@ -533,7 +598,7 @@ class StableDiffusionXLESDAdapter(BaseESDAdapter):
                 num_inference_steps=config.num_inference_steps,
                 guidance_scale=config.guidance_scale,
                 run_till_timestep=run_till_timestep,
-                generator=torch.Generator().manual_seed(seed),
+                generator=make_sampling_generator(config.device, seed),
                 output_type="latent",
                 height=context["resolution"],
                 width=context["resolution"],
@@ -604,7 +669,6 @@ class FluxESDAdapter(BaseESDAdapter):
     component_attr = "transformer"
     default_base_model_id = "black-forest-labs/FLUX.1-dev"
     default_save_path = "esd-models/flux/"
-    taef1_model_id = "madebyollin/taef1"
 
     def normalize_train_method(self, train_method: str) -> str:
         aliases = {
@@ -628,11 +692,6 @@ class FluxESDAdapter(BaseESDAdapter):
             torch_dtype=config.torch_dtype,
             use_safetensors=True,
         ).to(config.device)
-        pipe.vae = AutoencoderTiny.from_pretrained(
-            self.taef1_model_id,
-            torch_dtype=config.torch_dtype,
-        ).to(config.device)
-        pipe.vae.requires_grad_(False)
         if pipe.text_encoder is not None:
             pipe.text_encoder.requires_grad_(False)
         if getattr(pipe, "text_encoder_2", None) is not None:
@@ -644,7 +703,6 @@ class FluxESDAdapter(BaseESDAdapter):
         metadata["max_sequence_length"] = str(config.max_sequence_length)
         if config.inference_guidance_scale is not None:
             metadata["inference_guidance_scale"] = str(config.inference_guidance_scale)
-        metadata["taef1_model_id"] = self.taef1_model_id
         return metadata
 
     def select_parameter_names(self, component: torch.nn.Module, train_method: str) -> list[str]:
@@ -659,7 +717,10 @@ class FluxESDAdapter(BaseESDAdapter):
 
     def prepare_context(self, pipe, config: ESDConfig) -> Dict[str, Any]:
         resolution = self.resolve_resolution(pipe, config)
-        prompts = [config.erase_concept, config.erase_from if config.erase_from is not None else "", ""]
+        prompts = [config.erase_concept]
+        if config.erase_from is not None:
+            prompts.append(config.erase_from)
+        prompts.append("")
         with torch.no_grad():
             prompt_embeds_all, pooled_prompt_embeds_all, text_ids = pipe.encode_prompt(
                 prompts,
@@ -668,35 +729,30 @@ class FluxESDAdapter(BaseESDAdapter):
                 max_sequence_length=config.max_sequence_length,
             )
 
-            erase_prompt_embeds, erase_from_prompt_embeds, null_prompt_embeds = prompt_embeds_all.chunk(3)
-            erase_pooled_prompt_embeds, erase_from_pooled_prompt_embeds, null_pooled_prompt_embeds = (
-                pooled_prompt_embeds_all.chunk(3)
-            )
+            if config.erase_from is None:
+                erase_prompt_embeds, null_prompt_embeds = prompt_embeds_all.chunk(2)
+                erase_pooled_prompt_embeds, null_pooled_prompt_embeds = pooled_prompt_embeds_all.chunk(2)
+                erase_from_prompt_embeds = None
+                erase_from_pooled_prompt_embeds = None
+            else:
+                erase_prompt_embeds, erase_from_prompt_embeds, null_prompt_embeds = prompt_embeds_all.chunk(3)
+                erase_pooled_prompt_embeds, erase_from_pooled_prompt_embeds, null_pooled_prompt_embeds = (
+                    pooled_prompt_embeds_all.chunk(3)
+                )
 
-            probe = torch.randn(
-                (1, 3, resolution, resolution),
-                device=pipe.vae.device,
-                dtype=config.torch_dtype,
-            )
-            latent_probe = pipe.vae.encode(probe).latents
-            latent_grid_height = latent_probe.shape[2] // 2
-            latent_grid_width = latent_probe.shape[3] // 2
+            latent_grid_height = int(resolution) // pipe.vae_scale_factor
+            latent_grid_width = int(resolution) // pipe.vae_scale_factor
 
-        if getattr(pipe, "text_encoder_2", None) is not None:
-            pipe.text_encoder_2.to("cpu")
-        if pipe.text_encoder is not None:
-            pipe.text_encoder.to("cpu")
-        pipe.vae.to("cpu")
-        del probe, latent_probe
-        clear_device_cache(config.device)
-        gc.collect()
+        offload_modules_to_cpu(config.device, pipe.vae, pipe.text_encoder, getattr(pipe, "text_encoder_2", None))
 
         erase_prompt_embeds = erase_prompt_embeds.to(config.device)
-        erase_from_prompt_embeds = erase_from_prompt_embeds.to(config.device)
         null_prompt_embeds = null_prompt_embeds.to(config.device)
         erase_pooled_prompt_embeds = erase_pooled_prompt_embeds.to(config.device)
-        erase_from_pooled_prompt_embeds = erase_from_pooled_prompt_embeds.to(config.device)
         null_pooled_prompt_embeds = null_pooled_prompt_embeds.to(config.device)
+        if erase_from_prompt_embeds is not None:
+            erase_from_prompt_embeds = erase_from_prompt_embeds.to(config.device)
+        if erase_from_pooled_prompt_embeds is not None:
+            erase_from_pooled_prompt_embeds = erase_from_pooled_prompt_embeds.to(config.device)
 
         return {
             "resolution": resolution,
@@ -706,7 +762,8 @@ class FluxESDAdapter(BaseESDAdapter):
             "erase_pooled_prompt_embeds": erase_pooled_prompt_embeds,
             "erase_from_pooled_prompt_embeds": erase_from_pooled_prompt_embeds,
             "null_pooled_prompt_embeds": null_pooled_prompt_embeds,
-            "text_ids": text_ids.to(config.device),
+            # Flux text IDs are prompt-position metadata, so one batch slice can be reused.
+            "text_ids": text_ids[: config.batch_size].to(config.device),
             "latent_grid_height": latent_grid_height,
             "latent_grid_width": latent_grid_width,
             "sample_prompt_embeds": erase_prompt_embeds if config.erase_from is None else erase_from_prompt_embeds,
@@ -752,7 +809,7 @@ class FluxESDAdapter(BaseESDAdapter):
                 guidance_scale=config.inference_guidance_scale or config.guidance_scale,
                 max_sequence_length=config.max_sequence_length,
                 run_till_timestep=run_till_timestep,
-                generator=torch.Generator().manual_seed(seed),
+                generator=make_sampling_generator(config.device, seed),
                 output_type="latent",
                 height=context["resolution"],
                 width=context["resolution"],
@@ -792,16 +849,6 @@ class FluxESDAdapter(BaseESDAdapter):
                 img_ids=latent_image_ids,
                 return_dict=False,
             )[0]
-            noise_pred_from = prepared.component(
-                hidden_states=xt,
-                timestep=timestep / 1000,
-                guidance=guidance,
-                pooled_projections=context["erase_from_pooled_prompt_embeds"],
-                encoder_hidden_states=context["erase_from_prompt_embeds"],
-                txt_ids=context["text_ids"],
-                img_ids=latent_image_ids,
-                return_dict=False,
-            )[0]
             noise_pred_erase = prepared.component(
                 hidden_states=xt,
                 timestep=timestep / 1000,
@@ -812,6 +859,19 @@ class FluxESDAdapter(BaseESDAdapter):
                 img_ids=latent_image_ids,
                 return_dict=False,
             )[0]
+            if context["erase_from_prompt_embeds"] is not None:
+                noise_pred_from = prepared.component(
+                    hidden_states=xt,
+                    timestep=timestep / 1000,
+                    guidance=guidance,
+                    pooled_projections=context["erase_from_pooled_prompt_embeds"],
+                    encoder_hidden_states=context["erase_from_prompt_embeds"],
+                    txt_ids=context["text_ids"],
+                    img_ids=latent_image_ids,
+                    return_dict=False,
+                )[0]
+            else:
+                noise_pred_from = noise_pred_erase
 
         prepared.use_student()
         prepared.component.train()
@@ -830,10 +890,224 @@ class FluxESDAdapter(BaseESDAdapter):
         return StepResult(model_pred=model_pred, target=target, timestep_index=run_till_timestep)
 
 
+class Flux2KleinESDAdapter(BaseESDAdapter):
+    family = "flux2_klein"
+    component_attr = "transformer"
+    default_base_model_id = "black-forest-labs/FLUX.2-klein-base-4B"
+    default_save_path = "esd-models/flux2-klein/"
+
+    def normalize_train_method(self, train_method: str) -> str:
+        aliases = {
+            "xattn": "esd-x",
+            "xattn-strict": "esd-x-strict",
+            "esd-x": "esd-x",
+            "esd-x-strict": "esd-x-strict",
+        }
+        normalized = aliases.get(train_method)
+        if normalized is None:
+            raise ValueError(f"Unsupported FLUX.2 Klein train method: {train_method}")
+        return normalized
+
+    def default_lr_for_method(self, train_method: str) -> float:
+        return 1e-4
+
+    def load_pipeline(self, config: ESDConfig):
+        try:
+            from diffusers import Flux2KleinPipeline
+        except ImportError as exc:
+            raise ImportError(
+                "FLUX.2 Klein support requires a newer diffusers/transformers install with `Flux2KleinPipeline`."
+            ) from exc
+
+        pipe = Flux2KleinPipeline.from_pretrained(
+            config.base_model_id,
+            vae=None,
+            torch_dtype=config.torch_dtype,
+            use_safetensors=True,
+        ).to(config.device)
+        pipe.text_encoder.requires_grad_(False)
+        return pipe
+
+    def build_metadata(self, config: ESDConfig) -> Dict[str, str]:
+        metadata = super().build_metadata(config)
+        metadata["max_sequence_length"] = str(config.max_sequence_length)
+        if config.inference_guidance_scale is not None:
+            metadata["inference_guidance_scale"] = str(config.inference_guidance_scale)
+        return metadata
+
+    def select_parameter_names(self, component: torch.nn.Module, train_method: str) -> list[str]:
+        attention_suffixes = (
+            "to_q",
+            "to_k",
+            "to_v",
+            "to_out.0",
+            "add_q_proj",
+            "add_k_proj",
+            "add_v_proj",
+            "to_add_out",
+        )
+        strict_suffixes = ("to_k", "to_v", "add_k_proj", "add_v_proj")
+
+        def selector(module_name: str) -> bool:
+            if train_method == "esd-x":
+                return module_name.endswith(attention_suffixes)
+            if train_method == "esd-x-strict":
+                return module_name.endswith(strict_suffixes)
+            return False
+
+        return select_parameter_names(component, selector)
+
+    def prepare_context(self, pipe, config: ESDConfig) -> Dict[str, Any]:
+        resolution = self.resolve_resolution(pipe, config)
+        with torch.no_grad():
+            erase_prompt_embeds, erase_text_ids = pipe.encode_prompt(
+                prompt=config.erase_concept,
+                device=config.device,
+                num_images_per_prompt=config.batch_size,
+                max_sequence_length=config.max_sequence_length,
+            )
+            erase_prompt_embeds = erase_prompt_embeds.to(config.device)
+            erase_text_ids = erase_text_ids.to(config.device)
+
+            null_prompt_embeds, null_text_ids = pipe.encode_prompt(
+                prompt="",
+                device=config.device,
+                num_images_per_prompt=config.batch_size,
+                max_sequence_length=config.max_sequence_length,
+            )
+            null_prompt_embeds = null_prompt_embeds.to(config.device)
+            null_text_ids = null_text_ids.to(config.device)
+
+            erase_from_prompt_embeds = None
+            erase_from_text_ids = None
+            if config.erase_from is not None:
+                erase_from_prompt_embeds, erase_from_text_ids = pipe.encode_prompt(
+                    prompt=config.erase_from,
+                    device=config.device,
+                    num_images_per_prompt=config.batch_size,
+                    max_sequence_length=config.max_sequence_length,
+                )
+                erase_from_prompt_embeds = erase_from_prompt_embeds.to(config.device)
+                erase_from_text_ids = erase_from_text_ids.to(config.device)
+
+        offload_modules_to_cpu(config.device, pipe.text_encoder)
+
+        return {
+            "resolution": resolution,
+            "erase_prompt_embeds": erase_prompt_embeds,
+            "erase_from_prompt_embeds": erase_from_prompt_embeds,
+            "null_prompt_embeds": null_prompt_embeds,
+            "erase_text_ids": erase_text_ids,
+            "erase_from_text_ids": erase_from_text_ids,
+            "null_text_ids": null_text_ids,
+            "sample_prompt_embeds": erase_prompt_embeds if erase_from_prompt_embeds is None else erase_from_prompt_embeds,
+            "sample_text_ids": erase_text_ids if erase_from_text_ids is None else erase_from_text_ids,
+            "student_prompt_embeds": erase_prompt_embeds if erase_from_prompt_embeds is None else erase_from_prompt_embeds,
+            "student_text_ids": erase_text_ids if erase_from_text_ids is None else erase_from_text_ids,
+        }
+
+    def get_training_timesteps(self, pipe, num_inference_steps: int, image_seq_len: int, device: str):
+        sigmas = np.linspace(1.0, 1 / num_inference_steps, num_inference_steps)
+        if getattr(pipe.scheduler.config, "use_flow_sigmas", False):
+            sigmas = None
+
+        mu = compute_empirical_mu(image_seq_len=image_seq_len, num_steps=num_inference_steps)
+        timesteps, _ = retrieve_flux2_klein_timesteps(
+            pipe.scheduler,
+            num_inference_steps,
+            device,
+            sigmas=sigmas,
+            mu=mu,
+        )
+        return timesteps
+
+    def training_step(self, pipe, prepared: PreparedComponent, context: Dict[str, Any], config: ESDConfig) -> StepResult:
+        run_till_timestep = random.randint(0, config.num_inference_steps - 1)
+        seed = random.randint(0, 2**15)
+
+        prepared.use_base()
+        prepared.component.eval()
+        with torch.no_grad():
+            sample_result = esd_flux2_klein_call(
+                pipe,
+                prompt_embeds=context["sample_prompt_embeds"],
+                negative_prompt_embeds=context["null_prompt_embeds"],
+                text_ids=context["sample_text_ids"],
+                negative_text_ids=context["null_text_ids"],
+                num_images_per_prompt=1,
+                num_inference_steps=config.num_inference_steps,
+                guidance_scale=config.inference_guidance_scale or config.guidance_scale,
+                max_sequence_length=config.max_sequence_length,
+                run_till_timestep=run_till_timestep,
+                generator=make_sampling_generator(config.device, seed),
+                output_type="latent",
+                height=context["resolution"],
+                width=context["resolution"],
+            )
+            xt = sample_result.images
+            latent_ids = sample_result.latent_ids
+
+            timesteps = self.get_training_timesteps(
+                pipe,
+                num_inference_steps=config.num_inference_steps,
+                image_seq_len=xt.shape[1],
+                device=config.device,
+            )
+            timestep = timesteps[run_till_timestep].unsqueeze(0).to(config.device)
+            guidance = None
+
+            noise_pred_null = prepared.component(
+                hidden_states=xt,
+                timestep=timestep / 1000,
+                guidance=guidance,
+                encoder_hidden_states=context["null_prompt_embeds"],
+                txt_ids=context["null_text_ids"],
+                img_ids=latent_ids,
+                return_dict=False,
+            )[0]
+            noise_pred_erase = prepared.component(
+                hidden_states=xt,
+                timestep=timestep / 1000,
+                guidance=guidance,
+                encoder_hidden_states=context["erase_prompt_embeds"],
+                txt_ids=context["erase_text_ids"],
+                img_ids=latent_ids,
+                return_dict=False,
+            )[0]
+            if context["erase_from_prompt_embeds"] is not None:
+                noise_pred_from = prepared.component(
+                    hidden_states=xt,
+                    timestep=timestep / 1000,
+                    guidance=guidance,
+                    encoder_hidden_states=context["erase_from_prompt_embeds"],
+                    txt_ids=context["erase_from_text_ids"],
+                    img_ids=latent_ids,
+                    return_dict=False,
+                )[0]
+            else:
+                noise_pred_from = noise_pred_erase
+
+        prepared.use_student()
+        prepared.component.train()
+        model_pred = prepared.component(
+            hidden_states=xt,
+            timestep=timestep / 1000,
+            guidance=guidance,
+            encoder_hidden_states=context["student_prompt_embeds"],
+            txt_ids=context["student_text_ids"],
+            img_ids=latent_ids,
+            return_dict=False,
+        )[0]
+
+        target = noise_pred_from - config.negative_guidance * (noise_pred_erase - noise_pred_null)
+        return StepResult(model_pred=model_pred, target=target, timestep_index=run_till_timestep)
+
+
 ADAPTERS = {
     "sd": StableDiffusionESDAdapter(),
     "sdxl": StableDiffusionXLESDAdapter(),
     "flux": FluxESDAdapter(),
+    "flux2_klein": Flux2KleinESDAdapter(),
 }
 
 
@@ -847,10 +1121,15 @@ def get_adapter(family: str) -> BaseESDAdapter:
 def run_esd_training(config: ESDConfig) -> str:
     adapter = get_adapter(config.family)
     config.train_method = adapter.normalize_train_method(config.train_method)
+    if config.allow_tf32 and torch.cuda.is_available():
+        torch.backends.cuda.matmul.allow_tf32 = True
     pipe = adapter.load_pipeline(config)
     pipe.set_progress_bar_config(disable=True)
+    component = getattr(pipe, adapter.component_attr)
+    if config.gradient_checkpointing and hasattr(component, "enable_gradient_checkpointing"):
+        component.enable_gradient_checkpointing()
 
-    prepared = adapter.create_prepared_component(pipe, config.train_method)
+    prepared = adapter.create_prepared_component(pipe, config.train_method, config)
     prepared.use_student()
 
     learning_rate = adapter.resolve_learning_rate(config)

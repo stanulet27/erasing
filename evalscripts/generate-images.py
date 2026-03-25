@@ -12,9 +12,18 @@ from utils.esd_checkpoint import apply_esd_checkpoint
 torch.set_grad_enabled(False)
 
 
+def make_generator(device: str, seed: int) -> torch.Generator:
+    target_device = torch.device(device)
+    if target_device.type == "cuda" and torch.cuda.is_available():
+        return torch.Generator(device=target_device).manual_seed(seed)
+    return torch.Generator().manual_seed(seed)
+
+
 def infer_model_name(base_model: str, esd_path: str | None) -> str:
     if esd_path is not None:
         return os.path.basename(esd_path).split(".")[0]
+    if "flux.2-klein" in base_model.lower() or "flux2-klein" in base_model.lower():
+        return "flux2-klein"
     if "flux" in base_model.lower():
         return "flux"
     if "xl" in base_model.lower():
@@ -75,7 +84,7 @@ def generate_images(
 
         images = pipe(
             prompt,
-            generator=torch.Generator().manual_seed(seed),
+            generator=make_generator(device, seed),
             num_inference_steps=num_inference_steps,
             guidance_scale=guidance_scale,
         ).images
