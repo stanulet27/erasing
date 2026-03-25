@@ -1,14 +1,14 @@
 # Erasing Concepts from Diffusion Models
 ###  [Project Website](https://erasing.baulab.info) | [Arxiv Preprint](https://arxiv.org/pdf/2303.07345.pdf) | [Fine-tuned Weights](https://erasing.baulab.info/weights/esd_models/) | [Demo](https://huggingface.co/spaces/baulab/Erasing-Concepts-In-Diffusion) <br>
 
-### Updated code 🚀 - Now support diffusers!! (Faster and cleaner)
+### Updated code 🚀 - Shared diffusers training core
 
 <div align='center'>
 <img src = 'images/applications.png'>
 </div>
 
 ## Code Update 🚀
-We are releasing a cleaner code for ESD with diffusers support. Compared to our old-code this version uses almost half the GPU memory and is 5-8 times faster. Because of this diffusers support - we believe it allows to generalise to latest models (FLUX ESD coming soon ... ) <br>
+We are releasing a cleaner code for ESD with diffusers support. Compared to our old-code this version uses almost half the GPU memory and is 5-8 times faster. The training entrypoints for SD, SDXL, and FLUX now share the same core logic, save metadata-aware checkpoints, and can target any compatible base model in the corresponding diffusers family via `--basemodel_id`. <br>
 
 To use the older version please visit our [older commit](https://github.com/rohitgandikota/erasing/tree/a2189e9ae677aca22a00c361bde25d3d320d8a61)
 
@@ -29,27 +29,29 @@ pip install --upgrade diffusers transformers torch
 ## Training Guide
 
 ### SDv1.4
-After installation, follow these instructions to train a custom ESD model for Stable Diffusion V1.4. Pick from following `'xattn'`,`'noxattn'`, `'selfattn'`, `'full'`:
+After installation, follow these instructions to train a custom ESD model for Stable Diffusion V1.x. Canonical train methods are `'esd-x'`, `'esd-u'`, `'selfattn'`, `'esd-all'`, and `'esd-x-strict'`. Legacy aliases such as `'xattn'`, `'noxattn'`, and `'full'` still work.
 ```python
-python esd_sd.py --erase_concept 'Van Gogh' --train_method 'xattn'
+python esd_sd.py --erase_concept 'Van Gogh' --train_method 'esd-x'
 ```
 
 💡 New application: You can now erase an attribute from a concept!! Instead of erasing a whole concept you can just precisely remove some of its attributes. For example, you can erase hats from cowboys but keep the rest intact!
 ```python
-python esd_sd.py --erase_concept 'cowboy hat' --erase_from 'cowboy' --train_method 'xattn'
+python esd_sd.py --erase_concept 'cowboy hat' --erase_from 'cowboy' --train_method 'esd-x'
 ```
 
 ### SDXL
-After installation, follow these instructions to train a custom ESD model for Stable Diffusion V1.4. Pick from following `'esd-x'`, `'esd-x-strict'` (NOTE: `'esd-u'` is currently experimental and might produce unexpected artifacts):
+After installation, follow these instructions to train a custom ESD model for SDXL. Pick from following `'esd-x'`, `'esd-x-strict'`, `'esd-u'`, `'esd-all'` (NOTE: `'esd-u'` and `'esd-all'` are still experimental and might produce unexpected artifacts):
 ```python
 python esd_sdxl.py --erase_concept 'Van Gogh' --train_method 'esd-x-strict'
 ```
 
 ### FLUX
-After installation (make sure: diffusers and transformers are up-to-date), follow these instructions to train a custom ESD model for FLUX.1-dev. Pick from following `'esd-x'`, `'esd-x-strict'` [ONLY WORKS ON 80GB GPUs - if you can do it in less memory, please open a PR, I would love to learn your tricks]:
+After installation (make sure: diffusers and transformers are up-to-date), follow these instructions to train a custom ESD model for FLUX.1-dev. Pick from following `'esd-x'`, `'esd-x-strict'`:
 ```python
 python esd_flux.py --erase_concept 'monster' --train_method 'esd-x' --negative_guidance 2
 ```
+
+All three training scripts also accept `--basemodel_id` so you can point them at any compatible diffusers model in that family.
 
 The optimization process for erasing undesired visual concepts from pre-trained diffusion model weights involves using a short text description of the concept as guidance. The ESD model is fine-tuned with the conditioned and unconditioned scores obtained from frozen SD model to guide the output away from the concept being erased. The model learns from it's own knowledge to steer the diffusion process away from the undesired concept.
 <div align='center'>
@@ -58,11 +60,11 @@ The optimization process for erasing undesired visual concepts from pre-trained 
 
 ## Generating Images
 
-Generating images from custom ESD model is super easy. Please follow `notebook/esd_inference_sdxl.ipynb` notebook
+Generating images from a custom ESD model is super easy. Please follow the notebooks in `notebooks/`.
 
-For an automated script to generate a ton of images for your evaluations use our evalscripts
+For an automated script to generate a ton of images for your evaluations use our evalscripts. The loader now auto-detects whether a checkpoint targets `unet` or `transformer`, so the same script works for SD, SDXL, and FLUX checkpoints.
 ```python
-python evalscripts/generate-images.py --base_model 'stabilityai/stable-diffusion-xl-base-1.0' --esd_path 'esd-models/sdxl/esd-kelly-from-kelly.safetensors' --num_images 1 --prompts_path 'data/kelly_prompts.csv' --num_inference_steps 20 --guidance_scale 7
+python evalscripts/generate-images.py --base_model 'stabilityai/stable-diffusion-xl-base-1.0' --esd_path 'esd-models/sdxl/esd-kelly-from-kelly.safetensors' --num_samples 1 --prompts_path 'data/kelly_prompts.csv' --num_inference_steps 20 --guidance_scale 7
 ```
 
 ### UPDATE (NudeNet)

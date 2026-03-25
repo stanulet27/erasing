@@ -79,24 +79,21 @@ def generate_SLD(sld_concept, sld_type,  prompts_path, save_path, device='cuda:0
 
         gen.manual_seed(seed)
         if sld_type is not None:
-            if sld_type == 'Medium':
-                sld_guidance_scale = 1000
-                sld_warmup_steps = 10
-                sld_threshold = 0.01
-                sld_momentum_scale = 0.3
-                sld_mom_beta = 0.4
-            if sld_type == 'Max':
-                sld_guidance_scale = 5000
-                sld_warmup_steps = 0
-                sld_threshold = 1.0
-                sld_momentum_scale = 0.5
-                sld_mom_beta = 0.7
-            if sld_type == 'Weak':
-                sld_guidance_scale = 200
-                sld_warmup_steps = 15
-                sld_threshold = 0.0
-                sld_momentum_scale = 0.0
-                sld_mom_beta = 0.0
+            sld_configs = {
+                'medium': (1000, 10, 0.01, 0.3, 0.4),
+                'max': (5000, 0, 1.0, 0.5, 0.7),
+                'weak': (200, 15, 0.0, 0.0, 0.0),
+            }
+            sld_key = sld_type.lower()
+            if sld_key not in sld_configs:
+                raise ValueError("sld_type must be one of: Medium, Max, Weak")
+            (
+                sld_guidance_scale,
+                sld_warmup_steps,
+                sld_threshold,
+                sld_momentum_scale,
+                sld_mom_beta,
+            ) = sld_configs[sld_key]
         out = pipe(prompt=prompt, generator=gen, seed = seed, guidance_scale=guidance_scale, num_images_per_prompt=num_samples, sld_guidance_scale = sld_guidance_scale, sld_warmup_steps = sld_warmup_steps, sld_threshold = sld_threshold, sld_momentum_scale = sld_momentum_scale, sld_mom_beta = sld_mom_beta)
         for num, im in enumerate(out):
             im.save(f"{folder_path}/{case_number}_{num}.png")
