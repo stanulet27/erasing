@@ -17,6 +17,8 @@ We recently updated our codebase to be much more cleaner and faster. The setup i
 ```bash
 git clone https://github.com/rohitgandikota/erasing.git
 cd erasing
+conda create --name erasing python=3.14
+conda activate erasing
 pip install -r requirements.txt
 ```
 
