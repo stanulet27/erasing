@@ -5,8 +5,9 @@ import os
 import random
 import warnings
 from collections import OrderedDict
+from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, Mapping, Optional
+from typing import Any, Dict, Iterable, Iterator, Mapping, Optional
 
 import numpy as np
 import torch
@@ -200,6 +201,28 @@ def clear_device_cache(device: str) -> None:
         torch.cuda.empty_cache()
 
 
+@contextmanager
+def _suppress_transformers_pipeline_load_noise() -> Iterator[None]:
+    """Hide benign Transformers 5.x chatter during diffusers `from_pretrained` (SD/SDXL/…).
+
+    The "… LOAD REPORT" tables are emitted at WARNING on the **`transformers.modeling_utils`**
+    logger (see `log_state_dict_report(..., logger=logger)` in Transformers), not on
+    `transformers.utils.loading_report`. Lowering the whole library verbosity for this
+    block reliably suppresses those messages plus legacy CLIP config warnings.
+    """
+    try:
+        from transformers import logging as transformers_logging
+    except ImportError:
+        yield
+        return
+    previous = transformers_logging.get_verbosity()
+    transformers_logging.set_verbosity_error()
+    try:
+        yield
+    finally:
+        transformers_logging.set_verbosity(previous)
+
+
 def offload_modules_to_cpu(device: str, *modules: Optional[torch.nn.Module]) -> None:
     for module in modules:
         if module is not None:
@@ -315,9 +338,6 @@ class StableDiffusionESDAdapter(BaseESDAdapter):
 
     def default_lr_for_method(self, train_method: str) -> float:
         return 5e-5
-
-    def trainable_param_dtype(self, config: ESDConfig) -> Optional[torch.dtype]:
-        return torch.float32
 
     def load_pipeline(self, config: ESDConfig):
         pipe = StableDiffusionPipeline.from_pretrained(
@@ -494,9 +514,6 @@ class StableDiffusionXLESDAdapter(BaseESDAdapter):
         if train_method.startswith("esd-x"):
             return 2e-4
         return 1e-5
-
-    def trainable_param_dtype(self, config: ESDConfig) -> Optional[torch.dtype]:
-        return torch.float32
 
     def load_pipeline(self, config: ESDConfig):
         pipe = StableDiffusionXLPipeline.from_pretrained(
@@ -1146,7 +1163,8 @@ def run_esd_training(config: ESDConfig) -> str:
     config.train_method = adapter.normalize_train_method(config.train_method)
     if config.allow_tf32 and torch.cuda.is_available():
         torch.backends.cuda.matmul.allow_tf32 = True
-    pipe = adapter.load_pipeline(config)
+    with _suppress_transformers_pipeline_load_noise():
+        pipe = adapter.load_pipeline(config)
     pipe.set_progress_bar_config(disable=True)
     component = getattr(pipe, adapter.component_attr)
     if config.gradient_checkpointing and hasattr(component, "enable_gradient_checkpointing"):
