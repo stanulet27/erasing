@@ -32,7 +32,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--max_sequence_length",
         help="max sequence length for FLUX text encoders. Defaults to 77; increase for longer prompts.",
         type=int,
-        default=77,
+        default=512,
     )
     parser.add_argument(
         "--train_method",

@@ -34,6 +34,20 @@ TARGET_MODULE_TYPES = {
 }
 
 
+def flux_latent_patch_grid_hw(
+    height_px: int, width_px: int, vae_scale_factor: int
+) -> tuple[int, int]:
+    """Height/width of the Flux patch grid for packed latents.
+
+    Matches ``FluxPipeline.prepare_latents`` and ``_prepare_latent_image_ids(..., h//2, w//2)``.
+    Same geometry as HuggingFace ``examples/dreambooth/train_dreambooth_flux.py``, which uses
+    ``model_input.shape[2] // 2`` and ``model_input.shape[3] // 2`` on unpacked VAE latents.
+    """
+    latent_h = 2 * (int(height_px) // (vae_scale_factor * 2))
+    latent_w = 2 * (int(width_px) // (vae_scale_factor * 2))
+    return latent_h // 2, latent_w // 2
+
+
 @dataclass
 class ESDConfig:
     family: str
@@ -686,6 +700,9 @@ class FluxESDAdapter(BaseESDAdapter):
         return 1e-4
 
     def load_pipeline(self, config: ESDConfig):
+        # No VAE for ESD (unlike DreamBooth): training latents come only from the transformer
+        # sampling loop (`esd_flux_call` with `output_type="latent"`), never from pixel encode/decode.
+        # `vae=None` skips loading the VAE; `FluxPipeline` still sets `vae_scale_factor` (default 8) for geometry.
         pipe = FluxPipeline.from_pretrained(
             config.base_model_id,
             vae=None,
@@ -740,10 +757,8 @@ class FluxESDAdapter(BaseESDAdapter):
                     pooled_prompt_embeds_all.chunk(3)
                 )
 
-            latent_grid_height = int(resolution) // pipe.vae_scale_factor
-            latent_grid_width = int(resolution) // pipe.vae_scale_factor
-
-        offload_modules_to_cpu(config.device, pipe.vae, pipe.text_encoder, getattr(pipe, "text_encoder_2", None))
+        # VAE is not loaded (`vae=None`); only move text encoders off the train device after caching embeds.
+        offload_modules_to_cpu(config.device, pipe.text_encoder, getattr(pipe, "text_encoder_2", None))
 
         erase_prompt_embeds = erase_prompt_embeds.to(config.device)
         null_prompt_embeds = null_prompt_embeds.to(config.device)
@@ -762,10 +777,8 @@ class FluxESDAdapter(BaseESDAdapter):
             "erase_pooled_prompt_embeds": erase_pooled_prompt_embeds,
             "erase_from_pooled_prompt_embeds": erase_from_pooled_prompt_embeds,
             "null_pooled_prompt_embeds": null_pooled_prompt_embeds,
-            # Flux text IDs are prompt-position metadata, so one batch slice can be reused.
-            "text_ids": text_ids[: config.batch_size].to(config.device),
-            "latent_grid_height": latent_grid_height,
-            "latent_grid_width": latent_grid_width,
+            # Flux `text_ids` is (seq_len, 3), same for all batch rows — do not slice dim 0 by batch_size.
+            "text_ids": text_ids.to(config.device),
             "sample_prompt_embeds": erase_prompt_embeds if config.erase_from is None else erase_from_prompt_embeds,
             "sample_pooled_prompt_embeds": erase_pooled_prompt_embeds if config.erase_from is None else erase_from_pooled_prompt_embeds,
             "student_prompt_embeds": erase_prompt_embeds if config.erase_from is None else erase_from_prompt_embeds,
@@ -831,10 +844,19 @@ class FluxESDAdapter(BaseESDAdapter):
                     dtype=torch.float32,
                 )
 
+            # Patch grid must match packed latents from `prepare_latents` / DreamBooth-style training.
+            h_px = w_px = int(context["resolution"])
+            patch_h, patch_w = flux_latent_patch_grid_hw(h_px, w_px, pipe.vae_scale_factor)
+            expected_seq = patch_h * patch_w
+            if xt.shape[1] != expected_seq:
+                raise ValueError(
+                    f"FLUX packed latent length {xt.shape[1]} != patch grid {patch_h}×{patch_w}={expected_seq}. "
+                    "Sampling and transformer `img_ids` must use the same geometry as FluxPipeline.prepare_latents."
+                )
             latent_image_ids = FluxPipeline._prepare_latent_image_ids(
                 xt.shape[0],
-                context["latent_grid_height"],
-                context["latent_grid_width"],
+                patch_h,
+                patch_w,
                 config.device,
                 config.torch_dtype,
             )
@@ -919,6 +941,7 @@ class Flux2KleinESDAdapter(BaseESDAdapter):
                 "FLUX.2 Klein support requires a newer diffusers/transformers install with `Flux2KleinPipeline`."
             ) from exc
 
+        # Same as FLUX.1 ESD: no VAE — latents are produced in the Klein sampling path, not from pixels.
         pipe = Flux2KleinPipeline.from_pretrained(
             config.base_model_id,
             vae=None,
