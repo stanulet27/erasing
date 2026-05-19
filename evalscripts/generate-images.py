@@ -45,6 +45,7 @@ def generate_images(
     num_samples=10,
     from_case=0,
     component=None,
+    output_dir=None,
 ):
     """
     Generate images from a diffusers pipeline with an optional ESD checkpoint.
@@ -72,7 +73,10 @@ def generate_images(
             ) from exc
 
     df = pd.read_csv(prompts_path)
-    folder_path = os.path.join(save_path, model_name)
+    if output_dir is not None:
+        folder_path = output_dir
+    else:
+        folder_path = os.path.join(save_path, model_name)
     os.makedirs(folder_path, exist_ok=True)
 
     for _, row in df.iterrows():
@@ -112,6 +116,12 @@ if __name__ == "__main__":
     )
     parser.add_argument("--prompts_path", help="path to csv file with prompts", type=str, required=True)
     parser.add_argument("--save_path", help="folder where to save images", type=str, default="esd-images/")
+    parser.add_argument(
+        "--output_dir",
+        help="write images directly here (no model-name subfolder). Overrides save_path layout.",
+        type=str,
+        default=None,
+    )
     parser.add_argument("--device", help="cuda device to run on", type=str, default="cuda:0")
     parser.add_argument("--guidance_scale", help="guidance scale for eval", type=float, default=7.5)
     parser.add_argument("--from_case", help="continue generating from case_number", type=int, default=0)
@@ -130,4 +140,5 @@ if __name__ == "__main__":
         num_samples=args.num_samples,
         from_case=args.from_case,
         component=args.component,
+        output_dir=args.output_dir,
     )
