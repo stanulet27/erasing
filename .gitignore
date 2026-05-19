@@ -2,8 +2,6 @@
 __pycache__
 esd-models
 esd-images
-eval-runs/*
-!eval-runs/README.md
-!eval-runs/**/results.json
+eval-runs/**/outputs/
 esd_models
 *.pdf
