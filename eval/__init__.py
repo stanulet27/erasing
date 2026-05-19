@@ -7,7 +7,7 @@ from eval.layout import (
     experiment_name,
     experiment_paths,
 )
-from eval.results import load_results, save_results, make_results_template
+from eval.results_io import load_results, save_results, make_results_template
 
 __all__ = [
     "ERASING_ROOT",

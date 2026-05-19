@@ -14,7 +14,7 @@ from eval.checkpoints import (
 )
 from eval.fid import compute_fid
 from eval.layout import ERASING_ROOT, OUTPUT_MODELS, experiment_paths
-from eval.results import load_results, make_results_template, save_results, update_fid_scores
+from eval.results_io import load_results, make_results_template, save_results, update_fid_scores
 
 def _python() -> str:
     return sys.executable
@@ -76,7 +76,7 @@ def run_init(
     subprocess.run(
         [
             _python(),
-            str(ERASING_ROOT / "evalscripts" / "init_eval_run.py"),
+            str(ERASING_ROOT / "eval" / "scripts" / "init_eval_run.py"),
             "--negative-guidance",
             str(negative_guidance),
             "--iterations",
@@ -108,7 +108,7 @@ def run_generate(
 ) -> None:
     cmd = [
         _python(),
-        str(ERASING_ROOT / "evalscripts" / "generate_eval_outputs.py"),
+        str(ERASING_ROOT / "eval" / "scripts" / "generate_eval_outputs.py"),
         "--negative-guidance",
         str(negative_guidance),
         "--iterations",
@@ -129,7 +129,7 @@ def run_ensemble(
 ) -> None:
     cmd = [
         _python(),
-        str(ERASING_ROOT / "evalscripts" / "score_ensemble.py"),
+        str(ERASING_ROOT / "eval" / "scripts" / "score_ensemble.py"),
         "--negative-guidance",
         str(negative_guidance),
         "--iterations",

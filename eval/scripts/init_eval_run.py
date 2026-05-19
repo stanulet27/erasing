@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create eval-runs/<negX_iterY>/ with outputs/ subdirs and results.json."""
+"""Create eval/results/<negX_iterY>/ with outputs/ subdirs and results.json."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from _paths import ERASING_ROOT  # noqa: F401 — adds erasing/ to sys.path
 
 from eval.checkpoints import checkpoint_paths
 from eval.layout import ESD_MODELS_SD, OUTPUT_MODELS, experiment_paths
-from eval.results import make_results_template, save_results
+from eval.results_io import make_results_template, save_results
 
 
 def main() -> None:

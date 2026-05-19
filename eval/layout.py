@@ -1,4 +1,4 @@
-"""Paths and naming for eval-runs experiments."""
+"""Paths and naming for eval experiments (output under erasing/eval/results/)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 ERASING_ROOT = Path(__file__).resolve().parents[1]
-EVAL_RUNS_ROOT = Path(os.environ.get("CARVE_EVAL_RUNS_ROOT", ERASING_ROOT / "eval-runs"))
+EVAL_RUNS_ROOT = Path(os.environ.get("CARVE_EVAL_RUNS_ROOT", ERASING_ROOT / "eval" / "results"))
 ESD_MODELS_SD = Path(os.environ.get("CARVE_ESD_MODELS_SD", ERASING_ROOT / "esd-models" / "sd"))
 CHECKPOINTS_VOLUME_MOUNT = Path(os.environ.get("CARVE_CHECKPOINTS_MOUNT", "/checkpoints"))
 

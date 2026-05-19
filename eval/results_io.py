@@ -1,4 +1,4 @@
-"""Create and update eval-runs/results.json."""
+"""Create and update results.json inside each eval/results/<run>/ directory."""
 
 from __future__ import annotations
 

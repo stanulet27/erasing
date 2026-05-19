@@ -2,6 +2,7 @@
 __pycache__
 esd-models
 esd-images
-eval-runs/**/outputs/
+eval/results/**/outputs/
 esd_models
 *.pdf
+notebooks/*.safetensors

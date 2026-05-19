@@ -7,7 +7,7 @@
 |--------|----------|
 | `esd-checkpoints` | `teddy_bear-i200-s5.safetensors` (RL weights); ESD weights written each train |
 | `coco-val2017` | `/eval/train2017/` + `/eval/val2017/` — 500 matched reference JPGs |
-| `eval-runs` | outputs + `results.json` per experiment |
+| `eval-runs` | outputs + `results.json` per experiment (pulled locally into `erasing/eval/results/`) |
 
 
 ### Steps: 
@@ -39,13 +39,13 @@ modal run -d run_eval.py --negative-guidance {NEG_GUIDANCE} --iterations {ITERS}
 
 Pull results to local
 ```bash
-modal volume get eval-runs neg2_iter200 erasing/eval-runs
+modal volume get eval-runs neg2_iter200 erasing/eval/results
 ```
 
 
 ## Output format
 ```text
-eval-runs/
+erasing/eval/results/
   neg2_iter200/
     results.json
     outputs/{sd14_base,esd,rl}/

@@ -11,7 +11,7 @@ from pathlib import Path
 from _paths import ERASING_ROOT
 
 from eval.layout import OUTPUT_MODELS, experiment_paths
-from eval.results import load_results
+from eval.results_io import load_results
 
 
 def _run_generate(
@@ -28,7 +28,7 @@ def _run_generate(
 ) -> None:
     cmd = [
         sys.executable,
-        str(ERASING_ROOT / "evalscripts" / "generate-images.py"),
+        str(ERASING_ROOT / "eval" / "scripts" / "generate-images.py"),
         "--base_model",
         base_model,
         "--prompts_path",

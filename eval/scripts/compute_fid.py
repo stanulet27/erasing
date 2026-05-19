@@ -10,7 +10,7 @@ from _paths import ERASING_ROOT  # noqa: F401
 
 from eval.fid import compute_fid
 from eval.layout import OUTPUT_MODELS, experiment_paths
-from eval.results import load_results, save_results, update_fid_scores
+from eval.results_io import load_results, save_results, update_fid_scores
 
 
 def main() -> None:

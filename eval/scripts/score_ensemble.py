@@ -9,7 +9,7 @@ from _paths import ERASING_ROOT  # noqa: F401
 
 from eval.layout import OUTPUT_MODELS, experiment_paths
 from eval.ensemble_scores import load_ensemble, mean_scores_for_folder
-from eval.results import load_results, save_results, update_ensemble_scores
+from eval.results_io import load_results, save_results, update_ensemble_scores
 
 
 def main() -> None:
