@@ -7,8 +7,8 @@ import sys
 from pathlib import Path
 
 from eval.checkpoints import (
-    ESD_CHECKPOINT,
     checkpoint_paths,
+    esd_checkpoint_relpath,
     publish_checkpoints_to_volume,
     sync_checkpoints_from_volume,
 )
@@ -50,16 +50,23 @@ def run_esd_train(
     print("Running:", " ".join(cmd))
     subprocess.run(cmd, check=True, cwd=ERASING_ROOT)
 
-    esd_path = ERASING_ROOT / ESD_CHECKPOINT
+    esd_relpath = esd_checkpoint_relpath(
+        erase_concept=erase_concept,
+        negative_guidance=negative_guidance,
+        iterations=iterations,
+        train_method=train_method,
+        erase_from=erase_from,
+    )
+    esd_path = ERASING_ROOT / esd_relpath
     if not esd_path.is_file():
         raise FileNotFoundError(
             f"ESD training finished but checkpoint not found at {esd_path}. "
-            "Check erase_concept / train_method match eval/checkpoints.py."
+            "Check erase_concept / train_method / negative_guidance / iterations."
         )
 
     publish_checkpoints_to_volume()
-    print(f"Published ESD checkpoint to volume: {ESD_CHECKPOINT}")
-    return ESD_CHECKPOINT
+    print(f"Published ESD checkpoint to volume: {esd_relpath}")
+    return esd_relpath
 
 
 def run_init(
@@ -72,6 +79,7 @@ def run_init(
     base_model: str,
     num_inference_steps: int,
     guidance_scale: float,
+    train_method: str = "esd-u",
 ) -> None:
     subprocess.run(
         [
@@ -93,6 +101,8 @@ def run_init(
             str(num_inference_steps),
             "--guidance-scale",
             str(guidance_scale),
+            "--train-method",
+            train_method,
         ],
         check=True,
         cwd=ERASING_ROOT,
@@ -198,7 +208,12 @@ def run_eval_pipeline(
 
     sync_checkpoints_from_volume()
 
-    esd_rel, rl_rel = checkpoint_paths()
+    esd_rel, rl_rel = checkpoint_paths(
+        erase_concept=erase_concept,
+        negative_guidance=negative_guidance,
+        iterations=iterations,
+        train_method=train_method,
+    )
     paths = experiment_paths(negative_guidance, iterations)
 
     if not skip_init:
@@ -211,6 +226,7 @@ def run_eval_pipeline(
             base_model=base_model,
             num_inference_steps=num_inference_steps,
             guidance_scale=guidance_scale,
+            train_method=train_method,
         )
     elif not paths.results_path.is_file():
         results = make_results_template(

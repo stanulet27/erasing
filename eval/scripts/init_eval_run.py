@@ -22,6 +22,7 @@ def main() -> None:
     parser.add_argument("--base-model", type=str, default="CompVis/stable-diffusion-v1-4")
     parser.add_argument("--num-inference-steps", type=int, default=20)
     parser.add_argument("--guidance-scale", type=float, default=7.5)
+    parser.add_argument("--train-method", type=str, default="esd-u")
     args = parser.parse_args()
 
     paths = experiment_paths(args.negative_guidance, args.iterations)
@@ -31,7 +32,12 @@ def main() -> None:
 
     ESD_MODELS_SD.mkdir(parents=True, exist_ok=True)
 
-    esd_rel, rl_rel = checkpoint_paths()
+    esd_rel, rl_rel = checkpoint_paths(
+        erase_concept=args.erase_concept,
+        negative_guidance=args.negative_guidance,
+        iterations=args.iterations,
+        train_method=args.train_method,
+    )
     results = make_results_template(
         negative_guidance=args.negative_guidance,
         iterations=args.iterations,
