@@ -13,4 +13,5 @@ torch==2.11.0
 torchvision==0.26.0
 tqdm==4.67.3
 transformers==5.3.0
+wandb>=0.16
 watermark==2.6.0

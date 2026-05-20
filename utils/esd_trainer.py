@@ -196,6 +196,89 @@ def sanitize_checkpoint_name(text: str) -> str:
     return text.replace(" ", "_")
 
 
+@contextmanager
+def maybe_wandb(config: "ESDConfig") -> Iterator[Optional[Any]]:
+    """Yield a wandb run if ``WANDB_API_KEY`` is in env, else yield ``None``.
+
+    Opt-in: behaves identically to upstream unless the env var is set (typically
+    by attaching a Modal Secret named ``wandb-secret``). Optional env:
+
+    * ``WANDB_PROJECT``   (default: ``carve-esd``)
+    * ``WANDB_RUN_NAME``  (default: ``esd-<concept>-<method>-neg{g:g}_iter{i}``)
+    * ``WANDB_RUN_GROUP`` (default: unset; useful to group sweep cells)
+    * ``WANDB_TAGS``      (comma-separated; default: unset)
+    """
+    if not os.environ.get("WANDB_API_KEY"):
+        yield None
+        return
+    try:
+        import wandb
+    except ImportError:
+        warnings.warn("WANDB_API_KEY set but wandb is not installed; skipping logging.")
+        yield None
+        return
+
+    project = os.environ.get("WANDB_PROJECT", "carve-esd")
+    run_name = os.environ.get("WANDB_RUN_NAME") or (
+        f"esd-{sanitize_checkpoint_name(config.erase_concept)}"
+        f"-{config.train_method}"
+        f"-neg{config.negative_guidance:g}_iter{config.iterations}"
+    )
+    run_group = os.environ.get("WANDB_RUN_GROUP")
+    tags_raw = os.environ.get("WANDB_TAGS")
+    tags = [t.strip() for t in tags_raw.split(",") if t.strip()] if tags_raw else None
+
+    run = wandb.init(
+        project=project,
+        name=run_name,
+        group=run_group,
+        tags=tags,
+        config={
+            "family": config.family,
+            "base_model_id": config.base_model_id,
+            "erase_concept": config.erase_concept,
+            "erase_from": config.erase_from_effective,
+            "train_method": config.train_method,
+            "iterations": config.iterations,
+            "negative_guidance": config.negative_guidance,
+            "lr": config.lr,
+            "guidance_scale": config.guidance_scale,
+            "num_inference_steps": config.num_inference_steps,
+            "batch_size": config.batch_size,
+            "resolution": config.resolution,
+        },
+        reinit=True,
+    )
+    try:
+        yield run
+    finally:
+        run.finish()
+
+
+def esd_checkpoint_filename(
+    *,
+    erase_concept: str,
+    erase_from: Optional[str],
+    train_method: str,
+    negative_guidance: float,
+    iterations: int,
+) -> str:
+    """Single source of truth for ESD checkpoint filenames.
+
+    Mirrors the eval-pipeline experiment-name suffix (``neg{g:g}_iter{i}``) so
+    a trained checkpoint and its evaluation directory share a recognizable tag.
+    """
+    erase_from_effective = erase_from if erase_from is not None else erase_concept
+    method_suffix = train_method.replace("-", "")
+    sweep_suffix = f"neg{negative_guidance:g}_iter{iterations}"
+    return (
+        f"esd-{sanitize_checkpoint_name(erase_concept)}"
+        f"-from-{sanitize_checkpoint_name(erase_from_effective)}"
+        f"-{method_suffix}"
+        f"-{sweep_suffix}.safetensors"
+    )
+
+
 def clear_device_cache(device: str) -> None:
     if str(device).startswith("cuda") and torch.cuda.is_available():
         torch.cuda.empty_cache()
@@ -292,6 +375,7 @@ class BaseESDAdapter:
             "num_inference_steps": str(config.num_inference_steps),
             "guidance_scale": str(config.guidance_scale),
             "negative_guidance": str(config.negative_guidance),
+            "iterations": str(config.iterations),
             "batch_size": str(config.batch_size),
         }
         if config.resolution is not None:
@@ -299,11 +383,12 @@ class BaseESDAdapter:
         return metadata
 
     def build_checkpoint_path(self, config: ESDConfig) -> str:
-        method_suffix = config.train_method.replace("-", "")
-        filename = (
-            f"esd-{sanitize_checkpoint_name(config.erase_concept)}"
-            f"-from-{sanitize_checkpoint_name(config.erase_from_effective)}"
-            f"-{method_suffix}.safetensors"
+        filename = esd_checkpoint_filename(
+            erase_concept=config.erase_concept,
+            erase_from=config.erase_from,
+            train_method=config.train_method,
+            negative_guidance=config.negative_guidance,
+            iterations=config.iterations,
         )
         return os.path.join(config.save_path, filename)
 
@@ -1177,17 +1262,30 @@ def run_esd_training(config: ESDConfig) -> str:
     optimizer = torch.optim.Adam(prepared.parameters(), lr=learning_rate)
     context = adapter.prepare_context(pipe, config)
 
-    pbar = tqdm(range(config.iterations), desc=f"Training ESD ({adapter.family})")
-    for _ in pbar:
-        optimizer.zero_grad(set_to_none=True)
-        step_result = adapter.training_step(pipe, prepared, context, config)
-        loss = F.mse_loss(step_result.model_pred.float(), step_result.target.float())
-        loss.backward()
-        optimizer.step()
+    with maybe_wandb(config) as wandb_run:
+        pbar = tqdm(range(config.iterations), desc=f"Training ESD ({adapter.family})")
+        for step_idx, _ in enumerate(pbar):
+            optimizer.zero_grad(set_to_none=True)
+            step_result = adapter.training_step(pipe, prepared, context, config)
+            loss = F.mse_loss(step_result.model_pred.float(), step_result.target.float())
+            loss.backward()
+            optimizer.step()
 
-        postfix = {"esd_loss": f"{loss.item():.4f}", "timestep": step_result.timestep_index}
-        postfix.update({key: str(value) for key, value in step_result.metrics.items()})
-        pbar.set_postfix(postfix)
+            loss_value = float(loss.item())
+            postfix = {"esd_loss": f"{loss_value:.4f}", "timestep": step_result.timestep_index}
+            postfix.update({key: str(value) for key, value in step_result.metrics.items()})
+            pbar.set_postfix(postfix)
+
+            if wandb_run is not None:
+                log_payload: Dict[str, Any] = {
+                    "esd_loss": loss_value,
+                    "timestep": int(step_result.timestep_index),
+                    "lr": optimizer.param_groups[0]["lr"],
+                }
+                for key, value in step_result.metrics.items():
+                    if isinstance(value, (int, float)):
+                        log_payload[key] = value
+                wandb_run.log(log_payload, step=step_idx)
 
     prepared.use_student()
     checkpoint_path = adapter.build_checkpoint_path(config)

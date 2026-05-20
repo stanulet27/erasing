@@ -70,9 +70,9 @@ The optimization process for erasing undesired visual concepts from pre-trained 
 
 Generating images from a custom ESD model is super easy. Please follow the notebooks in `notebooks/`.
 
-For an automated script to generate a ton of images for your evaluations use our evalscripts. The loader now auto-detects whether a checkpoint targets `unet` or `transformer`, so the same script works for SD, SDXL, and FLUX checkpoints.
+For an automated script to generate a ton of images for your evaluations use the scripts under `eval/scripts/`. The loader now auto-detects whether a checkpoint targets `unet` or `transformer`, so the same script works for SD, SDXL, and FLUX checkpoints.
 ```python
-python evalscripts/generate-images.py --base_model 'stabilityai/stable-diffusion-xl-base-1.0' --esd_path 'esd-models/sdxl/esd-kelly-from-kelly.safetensors' --num_samples 1 --prompts_path 'data/kelly_prompts.csv' --num_inference_steps 20 --guidance_scale 7
+python eval/scripts/generate-images.py --base_model 'stabilityai/stable-diffusion-xl-base-1.0' --esd_path 'esd-models/sdxl/esd-kelly-from-kelly.safetensors' --num_samples 1 --prompts_path 'data/kelly_prompts.csv' --num_inference_steps 20 --guidance_scale 7
 ```
 
 ### UPDATE (NudeNet)

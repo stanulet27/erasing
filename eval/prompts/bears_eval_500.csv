@@ -1,0 +1,501 @@
+case_number,evaluation_seed,prompt,coco_image_id,coco_split
+0,1218853328,A large black bear walking across a forest.,404437,train2017
+1,1439622619,Snow surrounds a standing bear statue on a sidewalk,79047,train2017
+2,1008752943,Three bears crossing a still water creek onto grass.,15525,train2017
+3,964824319,Two bears sleeping on a dirt ground.,458586,train2017
+4,632880459,A mounted bear in a display case in a library.,189993,train2017
+5,198486416,a big bear sticks his tongue out of his mouth,168053,train2017
+6,2040695043,A polar bear is sitting on the edge on a rock.,149583,train2017
+7,312794864,a white polar bear is laying down in its pen,92839,val2017
+8,1780010572,A brown bear sniffs the air amid shrubs in a forest clearing.,454314,train2017
+9,835092972,Two bears walking together in the night.,71756,val2017
+10,2123333781,Two brown bears are wrestling with each other.,424326,train2017
+11,1047905204,Two small bears are grazing in the open field,458177,train2017
+12,23814791,A black bear walking around an enclosure outside.,547645,train2017
+13,1825989011,Three bears swimming in a rushing river surrounded by greenery.,341710,train2017
+14,755427535,Two polar bears with snowy fur stand together in a wintry landscape.,62540,train2017
+15,215686308,an image of a bear walking on grassland,366508,train2017
+16,1070298438,A couple of brown bears standing next to each other.,272773,train2017
+17,1960488639,A bear walking on all fours through the woods.,18385,train2017
+18,1995627518,Two bear cubs look out from the top of a tree.,16776,train2017
+19,1362784338,A polar bear is cocking its head to the side,67888,train2017
+20,1832837596,Two white polar bears rolling around on snow covered ground.,145212,train2017
+21,1915184358,a bear that is on top of a post,155921,train2017
+22,2038711176,A grizzly bear sitting outside in the grass.,322392,train2017
+23,1113219231,The two bears was outside on the tree bark,373218,train2017
+24,1191043170,A white polar bear is outside and having fun.,15870,train2017
+25,2081328344,Two bears relaxing in a pond side by side.,353284,train2017
+26,1179387055,a bear looking at something in the grass .,133874,train2017
+27,332788471,A large black bear stands beside two smaller cubs.,445276,train2017
+28,1007142260,A bear in a tree holding and chewing a branch.,407737,train2017
+29,1442454200,A brown animal behind a glass wall on a water tank.,437604,train2017
+30,346078411,this grizzly bear is standing in some shallow water,573509,train2017
+31,647812758,There are adult bears that is sitting in a den,271419,train2017
+32,1645124051,Bear sleeping on tree branch with leaves and sky,145587,train2017
+33,918920620,A black bear walking across a grass and purple flower covered field.,292982,train2017
+34,1781844052,An adult polar bear swimming inside the water.,366461,train2017
+35,1421124738,A bear in the wild looking through a wire fence.,191689,train2017
+36,2001129658,Two polar bears putting their faces close to each other.,499104,train2017
+37,267429212,A white bear lying down on top of a rock with his pawn close to his face.,533013,train2017
+38,1804502687,A bear walks through the grass near a tree line.,4338,train2017
+39,83889094,Polar Bear laying on back in water moving toward glass window,470641,train2017
+40,1633724084,A man kneeling next to a bear with a foamy blue mouth.,497662,train2017
+41,25323460,A black bear in the thicket with bush and rock,105134,train2017
+42,1282531582,a bear smelling something in the middle of a street,436578,train2017
+43,1799682701,A boy watches a polar bear chew on a bone,572572,train2017
+44,947206476,A large black bear moving toward a vehicle.,219524,train2017
+45,942408767,Two polar bears walk across a snowy tundra.,561027,train2017
+46,1871901278,Two black bears embrace inside a metal fence.,101265,train2017
+47,124660666,A Black bear semi concealed by smaller plants and bushes,143449,train2017
+48,1443665390,Bear standing on ledge overlooking blue pool area.,473030,train2017
+49,708861714,there is a large bear and a police man in the street,218305,train2017
+50,548157187,A polar bear shakes his head of water as it emerges from the water.,574874,train2017
+51,115820025,A bear standing up with trees in the background.,67118,train2017
+52,116402431,A brown bear is standing by a road and a tree.,239888,train2017
+53,1840877826,A long bear roams around a brushy area.,69956,train2017
+54,1982979741,A black bear is sitting in the bough of a tree.,226461,train2017
+55,215970859,"A bear sits on top of a bed of mulch, looking for food.",521667,train2017
+56,1628238707,A brown bear wading into a shallow river.,220630,train2017
+57,909074012,A white bear sleeping on a rocky ledge.,376443,train2017
+58,1403792057,An adult polar bear tending to one of her cubs.,181681,train2017
+59,1628334692,An animal on top of a table while a bear rides a bike.,498460,train2017
+60,1810607153,a brown bear sitting by a big rock,26159,train2017
+61,351784589,Two black bears standing on a rock staring down the camera.,450004,train2017
+62,83250566,Two bears are leaning on wall and looking at something.,299495,train2017
+63,223705953,A young bear sitting and enjoying the day in a grass meadow.,339227,train2017
+64,963026855,A black bear holds a carrot in his long nailed hand.,85670,train2017
+65,172907376,A polar bear looking at a group of rocks near him.,239338,train2017
+66,1062073697,A large black bear laying on top of a grass covered ground.,55085,train2017
+67,87531510,Two bears that are looking for fish to eat.,346678,train2017
+68,654477195,Two big polar bears playing in a lot if anow,201318,train2017
+69,542114964,A brown bear leans on the concrete and looks up.,513484,val2017
+70,491298929,A black bear is nestled in a thicket of red flowered brush.,398548,train2017
+71,936150587,a bear on a rusted metal walk way,387875,train2017
+72,1100558303,a brown bear has its mouth open and some trees,529379,train2017
+73,720648887,A bear in the grass surrounded by vultures.,229997,val2017
+74,703368777,Black bear laying on tree branch in room.,359834,train2017
+75,464280597,The two brown bears are playing in water.,127955,val2017
+76,110287971,A bear sitting beneath a wooden treehouse and a tire swing.,438692,train2017
+77,1611931113,a bear that is on some grass next to a fence,46898,train2017
+78,851819913,Two baby bears sitting in an animal enclosure.,27439,train2017
+79,1043030161,A large brown bear on a rock slab.,413871,train2017
+80,1295287749,A white polar bear is in the zoo.,152898,train2017
+81,519927529,There is a bear sitting in a lawn chair,479331,train2017
+82,176390590,Two black bears are sitting in the dirt.,199943,train2017
+83,1839869544,A brown bear is grazing in a field.,55601,train2017
+84,296166921,A polar bear is eating some carrots in the daytime.,525834,train2017
+85,1465576748,Bears in the water near a small waterfall.,571074,train2017
+86,1804138557,A large bear beast with razor sharp teeth.,71476,train2017
+87,453285987,a black and brown bear some water and some plants,549685,train2017
+88,1555585773,a man in a blue shirt and some children and a brown bear,553660,train2017
+89,657091982,A polar bear on a ledge of some sort.,296511,train2017
+90,756502473,One polar bear is trying to overcome another in a game of water wrestling.,400299,train2017
+91,2076605983,there is a medium size bear smelling something on the ground,519089,train2017
+92,1870778191,"Two bears in a grassy, flower-filled field.",231381,train2017
+93,1152750071,A black bear sitting down by a tree.,106401,train2017
+94,1054393708,Two bears coming out of the woods to a road.,234343,train2017
+95,1197987692,A black bear is eating red berries by some grass.,224878,train2017
+96,1047385483,The large black bear is outside posing for a picture.,139892,train2017
+97,1627746667,A black bear in grassy area next to a fence.,419497,train2017
+98,123265537,a bear reaching down at the water off a rock.,182927,train2017
+99,1395925222,A bear climbing on a log in the woods.,563683,train2017
+100,2094011037,there is a bear statue that is on top of a rope,430688,train2017
+101,1523961606,A bear in the woods sitting beside a tree.,407509,train2017
+102,1461744198,a bear has its mouth open and is stractighing its back on the tree,47936,train2017
+103,1186564497,The bear is reaching up to smell the flower.,379575,train2017
+104,820581106,A brown bear on a rocky area surrounded by seagulls.,526013,train2017
+105,1036616336,three adult brown bears standing around staring at something,112573,train2017
+106,2098425880,"A black bear in the woods, looking at the camera.",337962,train2017
+107,1032183433,Two brown bears standing on their hind legs in front of pine trees.,449856,train2017
+108,2108061573,one bear is taking a bath while the other is just getting in,576307,train2017
+109,74059253,Two black bears are lying in the green grass.,106585,train2017
+110,1263732197,A bear is standing on rocky ground with something in its mouth.,300123,train2017
+111,1736889606,A big brown bear turns its face toward the sky.,239706,train2017
+112,1044987715,Panda bear on back eating bamboo on top of rocks.,183949,train2017
+113,1584930775,A big brown bear stands on a rock behind a viewing window at the zoo.,404616,train2017
+114,1476426754,Two bears up in a tree during a snow storm,431727,val2017
+115,1420737819,a panda bear relaxing on a ledge in the shade,350794,train2017
+116,1948821078,A large black and brown bear posing in front of the camera.,145280,train2017
+117,1316935719,A large brown bear is standing near the grass.,431146,train2017
+118,990153355,A PICTURE OF A POLAR BEAR ON THE SIDE OF THE WATER,212803,train2017
+119,827143233,A Polar Bear cub laying on top of it's parent.,475465,train2017
+120,513483708,A bear is knee high in the grass.,482071,train2017
+121,795212538,A pair of stuffed bears stand posed in front of a background.,34193,train2017
+122,929364954,A pair of polar bears looking on from a zoo exhibit.,154011,train2017
+123,1187556862,a bear in the woods above a water source,505655,train2017
+124,1215470157,"A Polar Bear walks toward water, while a large bird lands on the opposite bank.",572517,val2017
+125,833728665,A white polar bear laying on top of a rock.,497350,train2017
+126,977032766,Two small black bears walking across a dirt track,208371,train2017
+127,770695571,An older couple kneeling down to hug a black bear sitting in a plastic chair.,256276,train2017
+128,60766757,a bear that is walking on a snow field,183359,train2017
+129,543669676,A polar bear diving off an outcrop of rocks into the water.,44250,train2017
+130,195488441,A white polar bear is laying in the snow.,140548,train2017
+131,1254717325,There is a bear sitting next to a bird.,355471,train2017
+132,2108307952,A bear is walking from the grass to the road.,445815,train2017
+133,52679490,A bear that is walking in an enclosure.,207916,train2017
+134,2016044512,a close up of a bear near bushes on a field,141468,train2017
+135,1891799103,Two bears are wading for food in a river.,409918,train2017
+136,791835934,a bear that is looking in a car window,317439,train2017
+137,1084386400,A large white polar bear laying on rocks next to a green hillside.,253831,train2017
+138,490000526,A polar bear is standing at the zoo,405718,train2017
+139,1721025347,The big bear is standing in the tall grassy field.,299381,train2017
+140,318180503,A bear rubbing it's ear on the rough ground with trees and shrubs behind it.,93836,train2017
+141,651662547,A black bear wreaking havoc in the backyard of someones house.,182316,train2017
+142,1304963614,Black bear crossing pathway near grassy area near trees.,575666,train2017
+143,1065972034,A black and white panda bear walking down a dirt road.,169313,train2017
+144,1787453807,A majestic bear looks out across a grass plain.,460927,val2017
+145,1633711193,A bus driving down a road next to a brown bear.,565875,train2017
+146,1901472238,a large bear is standing near the ice,340612,train2017
+147,1841810119,A bear walking through high grass in the woods.,180167,train2017
+148,258687184,There is a bear standing near the water.,461477,train2017
+149,426204934,A black bear is crouched down and sniffing out a brushy area.,362363,train2017
+150,906346324,A polar bear plunges into the cold water.,278287,train2017
+151,348697524,A black bear walking through the woods and trees.,361693,train2017
+152,1030213097,two brown bears in a bush with stone besides,255480,train2017
+153,322401182,A polar bear nuzzles close to a cub.,534881,train2017
+154,11492154,A person can be seen through the leaves of a tree.,514396,train2017
+155,1934898666,A young boy standing next to a bear in a zoo,92274,train2017
+156,2018258729,A bear roaming around on all fours in an enclosure.,323715,train2017
+157,140187131,A young bear cub is leashed or the amusement of the crowd.,314949,train2017
+158,1237401063,A black bear sitting on a log in a forest.,66087,train2017
+159,1950049698,A bear sits in a field with red and green grass.,467685,train2017
+160,1002547591,a black bear holding onto a tree as he reaches for a coconut with his mouth,28957,train2017
+161,849627058,A large white polar bear holding something in it's mouth.,78112,train2017
+162,492960451,A bear sits on the rocks by a pool of water in a wildlife exhibit.,99754,train2017
+163,965549222,A couple of bears that are standing on a rock.,397518,train2017
+164,1140882778,Water drips off a bear who is standing in  water.,559006,train2017
+165,306702926,MAN WADING IN A LAKE WITH THE DUCKS AND BEARS,428391,train2017
+166,712632936,A black bear is climbing a log and want to have fun.,557315,train2017
+167,1239573053,There is a very large brown bear inside of a zoo,370193,train2017
+168,534094883,A polar bear walking down rocks to a log.,43614,train2017
+169,1306061701,Black bear cubs practice climbing a tree in the forest.,244784,train2017
+170,1169288485,The polar bear is laying by itself on the rocks.,241156,train2017
+171,2120834317,a bear in tall bushes near a tree,486686,train2017
+172,345495128,Two brown bears interacting with each other in water,303250,train2017
+173,171200764,A young grizzly bear is walking in a creek.,332692,train2017
+174,1384360647,Two big brown bears laying on rocks in a zoo.,172404,train2017
+175,1075321966,A black bear sitting high up in a tree.,347529,train2017
+176,392245997,A polar bear licking its paw while grooming.,6437,train2017
+177,89101055,a small black bear up in a big tree,487461,train2017
+178,172793727,A large bear in a river with some rocks.,446763,train2017
+179,2020785643,There are a bunch of gummy bears on a white plate.,79394,train2017
+180,1899360801,A bear standing in a river below a small waterfall.,430681,train2017
+181,779489931,Adult and young black bears interacting in a grassy spot.,538957,train2017
+182,1872111746,A polar bear sitting on a rock and eating a carrot.,462984,train2017
+183,391883149,Authority personnel holding back dog while gunman prepares to shoot running black bear.,522225,train2017
+184,1494481363,A panda bear sits in a tree with no branches near a cluster of rocks and a building.,405032,train2017
+185,1431548670,there is a black bear that is in the tall grass,557187,train2017
+186,449253056,A brown bear int he water with his tongue sticking out.,580698,train2017
+187,1416495962,A black bear in grassy area next to trees and bushes.,536198,train2017
+188,2128023255,A polar bear covered in snow sticks out his tongue.,285908,train2017
+189,1719929315,Bear in forest surround by small trees and sticks,104001,train2017
+190,157612991,A bear walks down a trail in the forest.,527625,train2017
+191,378213925,Two white polar bears laying on top of a large rock.,1737,train2017
+192,1084044802,a white polar bear some black rocks and trees,446764,train2017
+193,497879474,A couple white bears standing on a grassy hillside.,445982,train2017
+194,4943787,a brown bear walking along some tall grass and trees,495079,train2017
+195,1984173309,Two brown bears growling at each other while laying on a log.,318080,val2017
+196,232804774,A bear walking towards a very large tree.,115331,train2017
+197,1553830525,A black bear walking around in a wooded area,322692,train2017
+198,2141011556,A couple of black bears snuggling each other.,75791,train2017
+199,221670908,Two brown bears laying down on some straw,396194,train2017
+200,1146997816,Brown bear laying down on a log of wood in the forrest.,202966,train2017
+201,562697526,A bear stands in front of a large fallen tree.,581594,train2017
+202,1881694278,Four bears are crossing a road next to some woods.,465559,train2017
+203,521521078,the bears are walking near water and rocks.,521236,train2017
+204,1027774780,A brown bear laying down in an area with little vegetation,565077,train2017
+205,1334661688,A large bear walking through a forest near trees.,490160,train2017
+206,58731376,A bear smelling the dried out grass outdoors.,236123,train2017
+207,1752306681,A BEAR IS EATING FISH IN THE WATER,106243,train2017
+208,965081954,A large white polar bear walking across a stone wall.,340698,train2017
+209,1981903597,Polar bear at zoo looking at a metal rail in the middle of a pit.,333708,train2017
+210,661300942,A big burly grizzly bear is show with grass in the background.,285,val2017
+211,1253535854,A bear walking around in a zoo exhibit.,372855,train2017
+212,1174350979,a close up of a polar bear in a body of water,212688,train2017
+213,2072319898,A bear looks around in a rocky enclosure.,313412,train2017
+214,1046816259,A brown bear walking through a forest next to a fallen log.,11552,train2017
+215,621232513,A polar bear is playing with a blue bottle underwater.,552253,train2017
+216,818665301,A large bear rubbing against an ash tree.,230428,train2017
+217,586298866,a white bear is standing up on the rocks,204458,train2017
+218,1186473561,A large bear laying on the side of a rocky,165141,train2017
+219,1459753033,two grizzly bears one has caught a fish on the falls,37582,train2017
+220,1147497835,Three bears walking in an embankment with a forest in the background.,165500,val2017
+221,1214784185,A brown bear walking across a snow covered field.,503207,train2017
+222,2102989254,A panda bear playing with a rock.,536517,train2017
+223,1917906456,Two bears are on a bank which is holding bags of gravel.,61515,train2017
+224,2080230418,The bear is wondering about in the woods.,311938,train2017
+225,1427818730,A bear is walking around some trees in the wilderness.,46612,train2017
+226,1620104855,A bear lying its head on a downed log with its mouth open,337167,train2017
+227,1382023198,a couple of bears are running around in a field,85926,train2017
+228,1025662000,A bear is walking through some rolled hay,90075,train2017
+229,1644847276,A brown bear standing up that almost looks fake.,412842,train2017
+230,1764265618,A polar bear is walking around in the zoo.,306664,train2017
+231,1366556920,Two brown bears on rocky ledges beneath trees.,345903,train2017
+232,1637375316,"An animal with brown, tan and black fur.",109051,train2017
+233,653287375,a polar bear submerged in a body of water,541911,train2017
+234,158998032,A black bear is in a yard setting with a bench.,332562,train2017
+235,1425906387,A young bear rumbles and lumbers across the field.,378059,train2017
+236,1891100776,A large black bear laying down while he eats,272804,train2017
+237,1962491159,A grizzle bear with its paw on a large wood log.,503715,train2017
+238,619142798,Two bears standing up against bars in a cage.,580296,train2017
+239,662976399,A brown bear resting its head on a rock,432675,train2017
+240,2016446768,A brown bear in a rocky zoo display,134346,train2017
+241,1454109425,A polar bear is on it's back in the water.,206809,train2017
+242,1707177877,A polar bear hovering their head above water.,492853,train2017
+243,1411178445,Bears sitting in the water in a fenced in enclosure.,419604,train2017
+244,1632127923,A black bear with brown markings on its face and chest sitting in the grass.,564870,train2017
+245,2095718469,A polar bear sitting down with big rocks.,459575,train2017
+246,154185462,The large polar bear is swimming in the pool.,286764,train2017
+247,293864877,a polar bear is laying down on some rocks,328295,train2017
+248,1234283419,two bears one laying one walking on concrete,295370,train2017
+249,388176285,THERE ARE STATUES OF BEARS IN THE PARK,84536,train2017
+250,422809996,A women who is standing next to some teddy bears.,264821,train2017
+251,1905584866,A little girl holding a brown teddy bear.,231675,train2017
+252,1286196999,A doll sitting at a table with two stuffed animals.,69884,train2017
+253,197529702,"several holiday statuettes of teddy bears, snow covered evergreens, and Santa Clauses.",365094,train2017
+254,241030242,A child is playing with a very large teddy bear.,22929,train2017
+255,1539588337,"A woman standing next to a teddy bear that is taller than her, outside a store selling teddy bears.",239693,train2017
+256,1849785671,An empty bottle of orange juice and a teddy bear sit atop a stack of library books.,227035,train2017
+257,1048819999,"A dining room table, with various home goods on the table and a desk.",6720,train2017
+258,1769748771,a large teddy bear in pink camouflage in a city street,76004,train2017
+259,773338452,An adult and child playing with Wii remote controls.,63347,train2017
+260,751917162,Teddy bears with a guitar are in the dark.,237501,train2017
+261,1643015259,A young boy sitting near a giant teddy bear,73197,train2017
+262,2137464556,Teddy bear and fire truck on a subway car seat.,34115,train2017
+263,997241761,An older woman and little girl holding a stuffed animal.,357814,train2017
+264,1090824373,Two young boys sitting on a bed with three teddy bears and a sign with the number twenty crossed out.,556162,train2017
+265,1096619850,A wet old teddy bear in the sand on a beach.,250204,train2017
+266,1998247509,A black cat sitting on desk with two teddy bears.,295051,train2017
+267,678500147,A young woman in the back of the car with a teddybear.,525184,train2017
+268,1897214963,A shelf in a store filled with stuffed animals and teddy bears.,222913,train2017
+269,1284857706,The girls sits on the step next to her brown teddy bear.,136701,train2017
+270,1074163698,a girl in a pink top on a bed and some stuffed animals,512112,train2017
+271,1297602688,A small girl is sitting on a bed with her teddy bear.,258336,train2017
+272,1652244897,A furnished doll house with a doll sitting on the floor.,512308,train2017
+273,458072318,a baby laying on a floor near a cell phone,439773,val2017
+274,1637947177,A teddy bear in the grass with people and other things behind.,197628,train2017
+275,1541717841,A woman saluting while holding a teddy bear.,97743,train2017
+276,1270762239,A room with people sitting in chairs next to a photo shoot.,99952,train2017
+277,94229853,A teddy bear and sketching model on a chair.,469614,train2017
+278,1699972733,a stuffed teddy bear wearing a tee shirt sitting on a desk,384261,train2017
+279,34780500,A large arrangement of teddy bears are set up on shelves.,461701,train2017
+280,210643427,Two boys sitting on the bottom bunk of a bunk bed.,444171,train2017
+281,2133427445,two brown teddy bears with red name tags on them,504470,train2017
+282,988350974,Two teddy bears that are sitting next to each other.,57222,train2017
+283,1513206988,A group of stuffed teddy bear sitting around a bird house.,100972,train2017
+284,816610683,Black and white photograph of cat and books on a bed.,66355,train2017
+285,587462342,a teddy bear behind a clear window in front of a curtain,435957,train2017
+286,169318686,A brown teddy bear wearing glasses and reading a book.,366349,train2017
+287,1893321208,two small kids sitting in a lap of a teddy bear,114870,train2017
+288,1567067057,A brown teddy bear riding on the handlebars of a bike.,265315,train2017
+289,387119894,a number of people walking near a stuffed animal stand,197950,train2017
+290,1403247962,Two teddy bears left in the middle of the road,579807,train2017
+291,754368373,A bedroom scene with a bed and dresser.,487256,train2017
+292,567622001,"Two young children sit in a chair, one holding a stuffed animal.",145139,train2017
+293,1571346130,A man is holding a stuffed teddy bear.,458931,train2017
+294,706712922,A cat and stuffed animals sits in front of a laptop,190387,train2017
+295,2069520666,A man holding a brown teddy bear while wearing a hipster shirt.,499210,train2017
+296,1454770940,A cat poses with a stuffed teddy bear.,265957,train2017
+297,2011467975,A large white teddy bear holding a baby in it's lap.,80016,train2017
+298,604546780,A memorial set on a fence by the ocean with flowers and teddy bears.,482409,train2017
+299,1706869362,A teddy bear shaped figurine standing with a sheep figurine.,100530,train2017
+300,1570991899,This teddy bear seems to be by himself in a large open building.,54706,train2017
+301,1694684834,A neat and tidy desk area in a cubicle,15374,train2017
+302,1135840948,a couple of teddy bears that has a wine bottle near by,96769,train2017
+303,530809576,Strange colored teddy bears and other stuffed animals are kind of scary.,247909,train2017
+304,1583063357,teddy bears of various animals sit in a window shop,171315,train2017
+305,1636492037,A person holds up a glass of wine while sitting in front of a tv.,439117,train2017
+306,465342967,A messy room with a television on in the corner,525223,train2017
+307,2024977737,Three brown teddy bears sit in blue display boxes.,521195,train2017
+308,1408776235,A group of people who are holding up teddy bears.,222086,train2017
+309,271515109,A toy sleigh filled with plush items and a teddy bear.,433652,train2017
+310,1297896903,A person on a bed in a small room.,63163,train2017
+311,1753617371,A young girl in pajamas laying bed holding a teddy bear,169854,train2017
+312,600337712,A TABLE FULL OF TEDDY BEARS WITH ARMOR MADE OF ALLUMINUM  FOIL,411142,train2017
+313,159824875,A boy sitting on a black couch with teddy bears.,1404,train2017
+314,2115806625,A work station is set up with dual monitors and other electronics.,423083,train2017
+315,417436465,The small boy joyfully hugs an orange teddy bear.,283055,train2017
+316,582672654,A little girl sitting next to another little girl in bed.,491111,train2017
+317,1948385094,A stuffed teddy bear sitting next to a picture.,305923,train2017
+318,1800135697,A display case of teddy bears in assorted colors and sizes.,461350,train2017
+319,1781915481,a sleepy dog rests its head on a stuffed animal,526295,train2017
+320,2101729519,A teddy bear shop with a full sized English guard teddy bear on display.,161071,train2017
+321,1752844368,Stuffed animals sitting on top of bookshelves in a row.,197322,train2017
+322,140515379,A costumed character with toothbrushes is amusing a crowd of children.,319818,train2017
+323,933166190,Two plush teddy bears placed on a freshly made bed.,225265,train2017
+324,1909954149,a teddy bear sitting on a white and blue wall,62957,train2017
+325,1557724698,two teddy bears sitting on a chair and wearing costumes,66568,train2017
+326,1577691630,A teddy bear on some rocks under a bridge.,338719,train2017
+327,1540492440,A teddy bear cake with a candle and sparklers.,61647,train2017
+328,1709996749,Brown dog holding up a teddy bear in its mouth on the floor.,54300,train2017
+329,815221547,A black dog is chewing on a teddy bear on the floor.,515998,train2017
+330,1952996248,A room with teddy bears and folded shirts.,543494,train2017
+331,910987546,A desktop on top of computer with a large monitor.,573973,train2017
+332,217233051,A teddy bear hanging on a fence by a string of fabric around its neck.,162915,train2017
+333,1046120419,A man tossing a teddy bear off the side of a bridge with a parachute.,61233,train2017
+334,881351238,A brown teddy bear laying face down on a sidewalk.,547614,train2017
+335,889734128,A bookshelf with a bear toy and various books.,83574,train2017
+336,927503999,A puppy lays on a blanket next to a stuffed animal.,192994,train2017
+337,1411152518,A hair stylist is drying a young boy's hair.,73864,train2017
+338,12178595,"A teddy bear and what looks like a sponge, sit in front of two teacups by a window.",73453,train2017
+339,621430136,Two teddy bears of different colors sitting next to each other.,246077,train2017
+340,1076551580,A teddy bear is tucked into white sheets on a pillow.,436603,train2017
+341,472130062,A set of ten stuffed animal teddy bears in two rows holding flags and with berets on.,125167,train2017
+342,566090561,Cardboard boxes piled up in a family living room area,262172,train2017
+343,1538638860,A red teddy bear wearing a santa hat sitting on a cocktail table.,43673,train2017
+344,1390587865,A baby girl smiling while sitting in front of an open laptop computer.,85826,train2017
+345,748381742,A white stuffed animal peeks out from the closet into a formal living room,455824,train2017
+346,225052083,A bunch of homemade stuffed animals are sitting on a chair.,566427,train2017
+347,1808011838,Stuffed animals oversee a pizza sitting on a table.,342862,train2017
+348,272979685,The man is holding a teddy bear while taking a picture.,276870,train2017
+349,1925327382,three teddy bears sitting on a picnic blankets,211120,val2017
+350,468383404,a number of teddy bears on a shelf near a wall,339966,train2017
+351,951548935,A child holds and sits with teddy bears on a couch.,250978,train2017
+352,186251406,A teddy bear holding a gun aimed at a stuffed sheep,283261,train2017
+353,1295492409,"Green, yellow, and pink teddy bears sitting on top of a table on display.",428867,val2017
+354,133790981,Stuffed Picachu and monkey along with a glass bottle.,135815,train2017
+355,2057211631,a stuffed teddy bear in a pink dress holding a stuffed bouquet of roses,322987,train2017
+356,1830831254,The cat is playing with the teddy bear.,493769,train2017
+357,2105688676,A teddy bear holding a smaller one while sitting on a small shelf.,77901,train2017
+358,1905085701,A teddy bear wearing a coat holding a fishing line.,10547,train2017
+359,346992476,A woman standing next to a teddy bear wearing a royal soldiers uniform.,494680,train2017
+360,637088959,A pink teddy bear standing next to some presents.,102594,train2017
+361,541988748,Two teddy bears and a Hello Kitty plush.,78407,train2017
+362,1396660850,The teddy bear is posed as if he was working out.,581256,train2017
+363,1266576188,A teddy bear and a metronome sitting on a table top.,221561,train2017
+364,1847692041,A display case holding three stuffed animals dressed in decorative garb.,546596,train2017
+365,491404673,A baby laying in bed next to a brown teddy bear.,137130,train2017
+366,923517027,A dusty teddy bear is laying on the ground.,378867,train2017
+367,1939413575,A young boy is playing with a large teddy bear.,73929,train2017
+368,1777315761,A brown teddy bear in front of a group of trees.,259616,train2017
+369,1947762953,A dog and stuffed teddy bear laying on covers.,400642,train2017
+370,1786661942,Two large brown dogs sleeping on a bed.,305564,train2017
+371,408390575,A Star Wars figurine shooting at a teddy bear.,163639,train2017
+372,1832937460,A dog in his cage sleeping with a teddy bear.,475663,train2017
+373,1094743340,A small brown teddy bear sitting on top of a box.,325527,val2017
+374,655579180,A teddy bear holding a white pillow in it's hands.,571678,train2017
+375,288335378,A baby is smiling with a teddy bear,8176,train2017
+376,366637148,Brown teddy bears sitting on a black iron basket in  store.,322847,train2017
+377,1854895521,a close up of a teddy bear on a balcony,107162,train2017
+378,1600506062,There are two teddy bears sitting next to each other.,138836,train2017
+379,257616339,A digital photo of a little girl walking with a teddy bear.,281442,train2017
+380,1415818695,A teddy bear sitting on a chair on the lawn.,119686,train2017
+381,1764409657,A woman is sitting on a bed with a teddy bear.,112029,train2017
+382,1816499958,A teddy bear with a red bow and a U.S.A shirt on in front of a building that says Canada.,161796,train2017
+383,1235358894,THERE IS A DESIGN OF AN ELEPHANT ON THE SHELF,288729,train2017
+384,1510308881,The cupcakes are decorated with teddy bears on the frosting.,298914,train2017
+385,913706213,A stuffed teddy bear wearing a blue neck tie.,219344,train2017
+386,2070987704,The young woman warmly holds her teddy bear.,371530,train2017
+387,464794418,A cake is made to look like a teddy bear,210404,train2017
+388,1578662692,"Two white teddy bears, one in pink and one in red, are posed together",280189,train2017
+389,1196441373,"Two teddy bears, one brown and one white, wearing bows.",546232,train2017
+390,1843023757,A bunch of teddy bears all around each other.,528408,train2017
+391,112759345,A baby sitting on a bed with her toys.,266990,train2017
+392,124352982,A group of teddy bears on the floor near a chair,54805,train2017
+393,1173687378,Truck with bed full of wood and a teddy bear.,95516,train2017
+394,1459535801,The young child is holding her teddy bear but still crying.,292440,train2017
+395,26224160,A young child laying in bed holding a teddy bear.,47778,train2017
+396,615260464,A baby girl with beautiful blue eyes standing next to a brown teddy bear.,2839,train2017
+397,1721355673,A stuffed animal teddy bear in a basket.,360762,train2017
+398,609346980,a teddy bear sitting inside a toilet bowl,135572,train2017
+399,394096254,A group of teddy bears hanging from a rack.,277543,train2017
+400,1615742667,The man hold the electric guitar in front of the ornate teddy bears.,167452,train2017
+401,1948393831,A dog laying on its side on the floor next to a teddy bear.,480656,train2017
+402,676067682,"A desk with a computer monitor, printer and cd rack.",466580,train2017
+403,1338472296,The teddy bear is in the room next to the window panel.,10714,train2017
+404,364887703,A woman with a hesitant look by a teddy bear on a wine glass.,116882,train2017
+405,668210614,A man in a black shirt is lying on a bed with his two cats.,154955,train2017
+406,213728259,A woman in a blue shirt sleeps on a bed surrounded by many stuffed animals.,39527,train2017
+407,1168672809,An overview shot of many people shopping a children's store.,400603,train2017
+408,1821129578,Two teddy bears one dressed as a groom and one as a bride,154530,train2017
+409,1898565319,Two teddy bears sitting beside each other in a chair.,468373,train2017
+410,1173242669,a glove a brown teddy bear some bushes and a wall,132330,train2017
+411,488842470,A stuffed cow sitting on a plaid blanket.,46255,train2017
+412,1846465000,A brown teddy bear with a bow on its head sits under an umbrella,332943,train2017
+413,1216534332,A group of teddy bears standing next to each other on the ground.,394900,train2017
+414,2090071756,A teddy bear sitting on a chair inside a room.,44068,val2017
+415,1324651201,two woman in a hallway holding teddy bears,387256,train2017
+416,947119487,person sewing a bright pink teddy bear on their lap,219141,train2017
+417,235286733,A teddy bear sitting in a rocking chair next to a display of hats.,265851,train2017
+418,877990647,A little girl holding a teddy bear in front of  four slices of chocolate cake.,106657,train2017
+419,907243029,a big white teddy bear and a white and brown cat,383494,train2017
+420,1097447932,a person sitting at a desk with a monitor and keyboard,160556,val2017
+421,1409274786,A teddy bear with a silver dress is sitting in a pile of crafting supplies.,248168,train2017
+422,33199694,two sad looking teddy bears sitting next to each other,168217,train2017
+423,1849649210,A small teddy bear with a card attached to a bunch of flowers,185756,train2017
+424,554848380,a big teddy bear sitting to a basket of little teddy bears,445784,train2017
+425,988317990,The sun has illuminated the messed up room.,28253,train2017
+426,1521136431,TWO KIDS ARE PLAYING INT HE ROOOM,187153,train2017
+427,1705407682,A little girl is standing and holding a teddy bear.,359262,train2017
+428,1873548915,A cat sleeping next to a pile of stuffed animals.,445267,train2017
+429,1974629461,There is a little girl holding a teddy bear in her hand.,264959,train2017
+430,1344585158,An older woman holding a stuffed brown teddy bear.,283957,train2017
+431,1736983049,A picture of a teddy bear with some message,164305,train2017
+432,1243458354,A trio of teddy bears bundled up on a bed.,113403,val2017
+433,1739600515,A teddy bear with stitches on its head and stomach in a sitting position.,415039,train2017
+434,1394868732,"A teddy bear, polar bear, Garfield and a snowman on a shelf.",41848,train2017
+435,1976101133,"A teddy bear view through the window, with honey in front of it.",509702,train2017
+436,378514962,A small stuffed plush sitting in a pocket.,228994,train2017
+437,454678712,Two people with a multicolored umbrella are standing under a shelter sign.,205808,train2017
+438,1871216424,a lady trying to kiss a giant teddy bear,496776,train2017
+439,337786687,A little boy playing with teddy bears on the ground,379130,train2017
+440,1332619083,Stuffed animals stacked together on a bed with a checkered sheet.,328745,train2017
+441,951644750,there is a cat that is drinking milk from a glass,236234,train2017
+442,722124509,Two kids are laying in bed with stuffed animals.,229919,train2017
+443,489740688,A woman looking at someone in the room holding a teddy bear.,27224,train2017
+444,1500555353,a bench that has a bunch of teddy bears and flowers on it,200231,train2017
+445,634323009,A girl in blue shirt holding a teddy bear in a room.,431954,train2017
+446,441542090,Five Teddy Bears are displayed lying on a couch.,356733,train2017
+447,1099375147,Many teddy bears are displayed in front of the trees.,295059,train2017
+448,745172634,The bedroom has stuffed animals and a stop sign on the wall.,75046,train2017
+449,656570734,a woman sitting on the floor with a teddy bear,295524,train2017
+450,760836806,A little girl sits on a chair holding a teddy bear.,381051,train2017
+451,2122216473,Cat sleeping with teddy bear on black background,551166,train2017
+452,1928033396,A child's bedroom with stuffed animals on a wall shelf.,432598,train2017
+453,1388168801,A bedroom has a regular bed and baby bed full of stuffed animals.,358255,train2017
+454,648357091,A man has a dazed look while sitting on a toilet.,32258,train2017
+455,293287259,Two stuffed teddy bears hanging from a rear view mirror.,276921,val2017
+456,1899269162,A child opens a package of a teddy bear in a wagon.,186997,train2017
+457,1179714407,A puppy playing with a teddy bear in his mouth.,41625,train2017
+458,241257421,A dollhouse with a female doll sitting in a chair.,114240,train2017
+459,318646463,A teddy bear is sitting on top of a branch.,472700,train2017
+460,1983168873,"Two teddy bears under a tree, surrounded by fake snow.",374156,train2017
+461,161521910,A group of teddy bears standing next to a palm tree.,474528,train2017
+462,1583715924,"A dining room table with a laptop, teddy bears and a bag.",552136,train2017
+463,329557138,A street post on a corner with stuffed animals near it,119802,train2017
+464,1651339677,A woman holding a stuffed brown teddy bear.,419186,train2017
+465,176191212,A teddy bear sitting in front of a laptop with a lady bug computer mouse.,197616,train2017
+466,808482355,A girl with a happy look holding a teddy bear on a trampoline.,270702,train2017
+467,2042811108,A man with a one eyed teddy bear attached to his chest.,47886,train2017
+468,265745534,A view of a store that sells teddy bears. There is a huge display in the window.,474293,val2017
+469,444537179,three teddy bears giving each other a hug,776,val2017
+470,362190850,A child is holding a teddy bear close to his face.,563697,train2017
+471,168114160,A white teddy bear wearing a T shirt.,203748,train2017
+472,1880157459,"A den with a wooden floor, wall and upstairs balcony.",394271,train2017
+473,681809785,A teddy bear sits next to a cup of candy canes.,469648,train2017
+474,1601387070,"A toy kitchen with a small table phone hat and teddy bear, with assorted crafts on the counter.",75663,train2017
+475,1663941470,A child kisses a teddy bear on the cheek.,357738,train2017
+476,1453275827,There is a teddy bear sitting on a shelf with jars of honey.,339796,train2017
+477,1437308013,Three teddy bears sitting together wearing Thanksgiving costumes.,128506,train2017
+478,1416011033,A black and white cat lying on top of a teddy bear.,323164,train2017
+479,1660280619,A teddy bear sitting behind an open book on the bed.,547100,train2017
+480,1082313657,a teddy bear with a hat placed on his head,334373,train2017
+481,645848526,Goats in colored uniforms racing and hurdling around a goat track.,441379,train2017
+482,350048353,A man outside with a teddy bear sitting in front of him on a chair. The teddy bear is watching TV in while in the desert.,355214,train2017
+483,1502468844,A man reacts to seeing his reflection as a teddy bear.,435499,train2017
+484,1683446724,A teddy bear being put into a toilet in a bathroom.,318365,train2017
+485,363865392,A stuffed teddy bears rests near a paneled wall.,131516,train2017
+486,1617825308,A bake topper of a baby holding a teddy bear.,198429,train2017
+487,548870021,two dogs sleep on a bed next to a stuffed animal.,457214,train2017
+488,1818516501,A female soldier sitting on top of a teddy bear.,180817,train2017
+489,78299575,A young girl who is on a couch holding a teddy bear.,323483,train2017
+490,1326569692,A boy sits next to a teddy bear while having a meal.,438701,train2017
+491,919950484,A teddy bear is laying on the green grass next to a dog.,309,train2017
+492,2088517710,A newborn baby has a large teddy bear.,326601,train2017
+493,972994972,People on a tour bus enjoying a tour.,307534,train2017
+494,665484476,some teddy bears dressed and posed for a picnic,349480,val2017
+495,1270417388,A man holds his arm out toward a teddy bear in a chair in front of a television set in the desert.,502318,train2017
+496,162124225,A cat sitting on top of a chair next to a teddy bear.,481028,train2017
+497,562851356,Picture of presents in a living room for Christmas,551791,train2017
+498,662510569,A little baby sitting next. to a white teddy bear.,512387,train2017
+499,776727492,A teddy bear is sitting in the snow on the mountain.,176142,train2017
