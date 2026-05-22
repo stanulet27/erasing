@@ -29,6 +29,17 @@ def load_ensemble():
 
 
 def score_image(ensemble, image: Image.Image, target_class: str) -> dict[str, float]:
+    """Per-detector confidence for ``target_class`` on a single image.
+
+    Each detector uses its own class-id space:
+
+    * YOLO uses ultralytics' 80-class COCO ordering (e.g. ``teddy bear`` → 77).
+    * RF-DETR / Faster R-CNN use COCO category ids (e.g. ``teddy bear`` → 88).
+
+    Passing the wrong id to a detector silently returns ~0 because the target
+    class never matches (or matches an unrelated class), so we mirror DDPO's
+    ``Ensemble.__call__`` and look up each id from its detector-specific map.
+    """
     frcnn_id = COCO_FRCNN_CLASS_IDS.get(target_class)
     if frcnn_id is None:
         raise KeyError(
@@ -36,9 +47,11 @@ def score_image(ensemble, image: Image.Image, target_class: str) -> dict[str, fl
             f"Add it to COCO_FRCNN_CLASS_IDS in eval/ensemble_scores.py"
         )
 
+    detr_id = ensemble.detr_name_to_id[target_class]
     yolo_id = ensemble.yolo_name_to_id[target_class]
+
     yolo = ensemble.call_yolo(image, yolo_id)
-    rtdetr = ensemble.call_detr(image, yolo_id)
+    rtdetr = ensemble.call_detr(image, detr_id)
     frcnn = ensemble.call_resnet(image, frcnn_id)
     combined = float(np.mean([yolo, rtdetr, frcnn]))
 

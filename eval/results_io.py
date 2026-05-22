@@ -91,19 +91,29 @@ def update_ensemble_scores(
 def update_fid_scores(
     results: dict[str, Any],
     *,
-    sd14_base: float,
-    esd: float,
-    rl: float,
+    sd14_base: float | None = None,
+    esd: float | None = None,
+    rl: float | None = None,
 ) -> None:
-    fid = results["fid_vs_coco"]
-    fid["sd14_base"] = sd14_base
-    fid["esd"] = esd
-    fid["rl"] = rl
+    """Write whichever FID scores were computed; recompute degeneration % from current state.
 
-    baseline = sd14_base
-    if baseline == 0:
-        raise ValueError("sd14_base FID must be non-zero to compute degeneration %")
+    All three models are optional so callers running a subset (e.g. ESD only,
+    skipping RL) can pass just what they have without crashing.
+    """
+    fid = results["fid_vs_coco"]
+    if sd14_base is not None:
+        fid["sd14_base"] = sd14_base
+    if esd is not None:
+        fid["esd"] = esd
+    if rl is not None:
+        fid["rl"] = rl
+
+    baseline = fid.get("sd14_base")
+    if baseline is None or baseline == 0:
+        return  # no baseline yet → can't compute degeneration
 
     deg = fid["degeneration_pct_vs_sd14_base"]
-    deg["esd"] = (esd - baseline) / baseline * 100.0
-    deg["rl"] = (rl - baseline) / baseline * 100.0
+    if fid.get("esd") is not None:
+        deg["esd"] = (fid["esd"] - baseline) / baseline * 100.0
+    if fid.get("rl") is not None:
+        deg["rl"] = (fid["rl"] - baseline) / baseline * 100.0

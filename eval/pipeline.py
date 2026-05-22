@@ -155,12 +155,14 @@ def run_fid(
     negative_guidance: float,
     iterations: int,
     coco_dir: Path,
+    only: list[str] | None = None,
 ) -> None:
     paths = experiment_paths(negative_guidance, iterations)
     results = load_results(paths.results_path)
 
+    models = only or list(OUTPUT_MODELS)
     scores: dict[str, float] = {}
-    for model in OUTPUT_MODELS:
+    for model in models:
         folder = paths.output_dir(model)
         print(f"FID {model}: {folder} vs {coco_dir}")
         scores[model] = compute_fid(folder, coco_dir)
@@ -168,13 +170,15 @@ def run_fid(
 
     update_fid_scores(
         results,
-        sd14_base=scores["sd14_base"],
-        esd=scores["esd"],
-        rl=scores["rl"],
+        sd14_base=scores.get("sd14_base"),
+        esd=scores.get("esd"),
+        rl=scores.get("rl"),
     )
     save_results(paths.results_path, results)
     deg = results["fid_vs_coco"]["degeneration_pct_vs_sd14_base"]
-    print(f"Degeneration vs sd14_base: esd={deg['esd']:.2f}%  rl={deg['rl']:.2f}%")
+    parts = [f"{m}={deg[m]:.2f}%" for m in ("esd", "rl") if deg.get(m) is not None]
+    if parts:
+        print(f"Degeneration vs sd14_base: {'  '.join(parts)}")
 
 
 def run_eval_pipeline(
@@ -195,8 +199,13 @@ def run_eval_pipeline(
     skip_ensemble: bool = False,
     skip_fid: bool = False,
     train_method: str = "esd-u",
-    generate_only: list[str] | None = None,
+    eval_models: list[str] | None = None,
 ) -> Path:
+    """Run the eval pipeline. ``eval_models`` (subset of OUTPUT_MODELS) restricts
+    which output families are generated, scored, and FID'd. Default: all three."""
+    models = eval_models or list(OUTPUT_MODELS)
+    only = None if set(models) == set(OUTPUT_MODELS) else models
+
     if not skip_esd_train:
         run_esd_train(
             erase_concept=erase_concept,
@@ -251,14 +260,14 @@ def run_eval_pipeline(
             negative_guidance=negative_guidance,
             iterations=iterations,
             device=device,
-            only=generate_only,
+            only=only,
         )
 
     if not skip_ensemble:
         run_ensemble(
             negative_guidance=negative_guidance,
             iterations=iterations,
-            only=generate_only,
+            only=only,
         )
 
     if not skip_fid:
@@ -271,6 +280,7 @@ def run_eval_pipeline(
                     negative_guidance=negative_guidance,
                     iterations=iterations,
                     coco_dir=coco_path,
+                    only=only,
                 )
             else:
                 print(f"skip_fid: COCO directory not found at {coco_path}")
