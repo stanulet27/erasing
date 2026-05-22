@@ -1,0 +1,71 @@
+{
+  "hyperparameters": {
+    "negative_guidance": 1.0,
+    "iterations": 500,
+    "erase_concept": "teddy bear",
+    "base_model": "CompVis/stable-diffusion-v1-4",
+    "num_images": 500,
+    "prompts_path": "eval/prompts/bears_eval_500.csv",
+    "num_inference_steps": 20,
+    "guidance_scale": 7.5
+  },
+  "checkpoints": {
+    "esd": "esd-models/sd/esd-teddy_bear-from-teddy_bear-esdu-neg1_iter500.safetensors",
+    "rl": "esd-models/sd/teddy_bear-i200-s5.safetensors"
+  },
+  "ensemble": {
+    "target_class": "teddy bear",
+    "sd14_base": {
+      "yolo": {
+        "mean_conf": 0.3512451575492505
+      },
+      "rtdetr": {
+        "mean_conf": 0.36654510851204397
+      },
+      "frcnn": {
+        "mean_conf": 0.40465420838445426
+      },
+      "ensemble": {
+        "mean_conf": 0.3741481581485829
+      }
+    },
+    "esd": {
+      "yolo": {
+        "mean_conf": 0.22194195113653495
+      },
+      "rtdetr": {
+        "mean_conf": 0.22602197383344175
+      },
+      "frcnn": {
+        "mean_conf": 0.2655146184042096
+      },
+      "ensemble": {
+        "mean_conf": 0.23782618112472867
+      }
+    },
+    "rl": {
+      "yolo": {
+        "mean_conf": null
+      },
+      "rtdetr": {
+        "mean_conf": null
+      },
+      "frcnn": {
+        "mean_conf": null
+      },
+      "ensemble": {
+        "mean_conf": null
+      }
+    }
+  },
+  "fid_vs_coco": {
+    "sd14_base": 98.98529907441377,
+    "esd": 97.29921615987087,
+    "rl": null,
+    "degeneration_pct_vs_sd14_base": {
+      "esd": -1.7033669952094284,
+      "rl": null
+    }
+  },
+  "created_at": "2026-05-22T21:11:06.062854+00:00"
+}
