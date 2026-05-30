@@ -57,6 +57,52 @@ def _grid(cells: list[dict], key: str) -> tuple[list[float], list[int], list[lis
     return negs, iters, z
 
 
+def _text_color_for_cell(value: float, vmin: float, vmax: float, cmap) -> str:
+    """Pick black or white annotation text from the cell's colormap background."""
+    if vmax == vmin:
+        t = 0.5
+    else:
+        t = (value - vmin) / (vmax - vmin)
+    t = max(0.0, min(1.0, t))
+    r, g, b, _ = cmap(t)
+    luminance = 0.299 * r + 0.587 * g + 0.114 * b
+    return "black" if luminance > 0.55 else "white"
+
+
+def _annotate_heatmap(
+    ax,
+    z: list[list[float]],
+    cmap,
+    fmt: str,
+    *,
+    vmin: float | None = None,
+    vmax: float | None = None,
+) -> None:
+    import math
+
+    flat = [v for row in z for v in row if not math.isnan(v)]
+    if not flat:
+        return
+    vmin = min(flat) if vmin is None else vmin
+    vmax = max(flat) if vmax is None else vmax
+
+    for i, row in enumerate(z):
+        for j, v in enumerate(row):
+            if math.isnan(v):
+                continue
+            color = _text_color_for_cell(v, vmin, vmax, cmap)
+            ax.text(
+                j,
+                i,
+                fmt.format(v),
+                ha="center",
+                va="center",
+                color=color,
+                fontsize=8,
+                fontweight="bold",
+            )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Plot eval sweep results.")
     parser.add_argument(
@@ -127,7 +173,8 @@ def main() -> int:
     ax_pareto.grid(True, alpha=0.3)
 
     negs, iters, z_ens = _grid(cells, "ens_esd")
-    im1 = ax_h1.imshow(z_ens, aspect="auto", origin="lower", cmap="viridis")
+    cmap_ens = plt.get_cmap("viridis")
+    im1 = ax_h1.imshow(z_ens, aspect="auto", origin="lower", cmap=cmap_ens)
     ax_h1.set_xticks(range(len(negs)))
     ax_h1.set_xticklabels([f"{n:g}" for n in negs])
     ax_h1.set_yticks(range(len(iters)))
@@ -136,13 +183,11 @@ def main() -> int:
     ax_h1.set_ylabel("iterations")
     ax_h1.set_title("ESD ensemble mean_conf\n(darker = more erased)")
     plt.colorbar(im1, ax=ax_h1, shrink=0.8)
-    for i, row in enumerate(z_ens):
-        for j, v in enumerate(row):
-            if v == v:  # not NaN
-                ax_h1.text(j, i, f"{v:.3f}", ha="center", va="center", color="white", fontsize=8)
+    _annotate_heatmap(ax_h1, z_ens, cmap_ens, "{:.3f}")
 
     _, _, z_deg = _grid(cells, "deg_esd")
-    im2 = ax_h2.imshow(z_deg, aspect="auto", origin="lower", cmap="magma")
+    cmap_deg = plt.get_cmap("magma")
+    im2 = ax_h2.imshow(z_deg, aspect="auto", origin="lower", cmap=cmap_deg)
     ax_h2.set_xticks(range(len(negs)))
     ax_h2.set_xticklabels([f"{n:g}" for n in negs])
     ax_h2.set_yticks(range(len(iters)))
@@ -151,10 +196,7 @@ def main() -> int:
     ax_h2.set_ylabel("iterations")
     ax_h2.set_title("FID degeneration %\n(darker = less damage)")
     plt.colorbar(im2, ax=ax_h2, shrink=0.8)
-    for i, row in enumerate(z_deg):
-        for j, v in enumerate(row):
-            if v == v:
-                ax_h2.text(j, i, f"{v:.1f}", ha="center", va="center", color="white", fontsize=8)
+    _annotate_heatmap(ax_h2, z_deg, cmap_deg, "{:.1f}")
 
     fig.tight_layout()
     args.out.parent.mkdir(parents=True, exist_ok=True)
