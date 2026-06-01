@@ -47,7 +47,7 @@ def score_image(ensemble, image: Image.Image, target_class: str) -> dict[str, fl
             f"Add it to COCO_FRCNN_CLASS_IDS in eval/ensemble_scores.py"
         )
 
-    detr_id = ensemble.detr_name_to_id[target_class]
+    detr_id = ensemble.yolo_name_to_id[target_class]
     yolo_id = ensemble.yolo_name_to_id[target_class]
 
     yolo = ensemble.call_yolo(image, yolo_id)

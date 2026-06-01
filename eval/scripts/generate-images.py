@@ -5,6 +5,7 @@ import sys
 import pandas as pd
 import torch
 from diffusers import DiffusionPipeline
+from diffusers.models.attention_processor import LoRAAttnProcessor
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from utils.esd_checkpoint import apply_esd_checkpoint
@@ -46,6 +47,7 @@ def generate_images(
     from_case=0,
     component=None,
     output_dir=None,
+    rl_path = None
 ):
     """
     Generate images from a diffusers pipeline with an optional ESD checkpoint.
@@ -71,6 +73,26 @@ def generate_images(
             raise RuntimeError(
                 f"Failed to load ESD checkpoint '{esd_path}' for base model '{base_model}'."
             ) from exc
+    elif rl_path is not None: 
+        #try rl
+        procs = {}
+        for name in pipe.unet.attn_processors.keys():
+            cross_dim = (
+                None if name.endswith("attn1.processor")
+                else pipe.unet.config.cross_attention_dim
+            )
+            if name.startswith("mid_block"):
+                hidden = pipe.unet.config.block_out_channels[-1]
+            elif name.startswith("up_blocks"):
+                block_id = int(name[len("up_blocks.")])
+                hidden = list(reversed(pipe.unet.config.block_out_channels))[block_id]
+            elif name.startswith("down_blocks"):
+                block_id = int(name[len("down_blocks.")])
+                hidden = pipe.unet.config.block_out_channels[block_id]
+            procs[name] = LoRAAttnProcessor(hidden_size=hidden, cross_attention_dim=cross_dim)
+        pipe.unet.set_attn_processor(procs)
+        pipe.unet.load_attn_procs(rl_path)
+
 
     df = pd.read_csv(prompts_path)
     if output_dir is not None:
@@ -108,6 +130,8 @@ if __name__ == "__main__":
         default="stabilityai/stable-diffusion-xl-base-1.0",
     )
     parser.add_argument("--esd_path", help="path to an ESD checkpoint", type=str, default=None)
+    parser.add_argument("--rl_path", help="path to an RL checkpoint", type=str, default=None)
+        
     parser.add_argument(
         "--component",
         help="explicit component to update (for example: unet or transformer). Usually auto-detected.",
@@ -132,6 +156,7 @@ if __name__ == "__main__":
     generate_images(
         base_model=args.base_model,
         esd_path=args.esd_path,
+        rl_path=args.rl_path,
         prompts_path=args.prompts_path,
         save_path=args.save_path,
         device=args.device,
